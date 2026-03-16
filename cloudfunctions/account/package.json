@@ -1,0 +1,9 @@
+{
+  "name": "fortune-account",
+  "version": "1.0.0",
+  "description": "Silent account bootstrap for da-ke-bu-bi-suan",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

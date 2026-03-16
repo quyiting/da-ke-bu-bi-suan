@@ -1,0 +1,46 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/draw/draw",
+    "pages/yao/yao",
+    "pages/chart/chart",
+    "pages/profile/profile"
+  ],
+  "window": {
+    "navigationBarTitleText": "大可不必算",
+    "navigationBarBackgroundColor": "#f5efe4",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#efe5d6",
+    "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "color": "#8b6a52",
+    "selectedColor": "#a84f2c",
+    "backgroundColor": "#fffaf3",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/draw/draw",
+        "text": "抽签"
+      },
+      {
+        "pagePath": "pages/yao/yao",
+        "text": "六爻"
+      },
+      {
+        "pagePath": "pages/chart/chart",
+        "text": "星盘"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "记录"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

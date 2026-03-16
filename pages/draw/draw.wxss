@@ -1,0 +1,222 @@
+.draw-hero,
+.ritual-panel,
+.result-card {
+  padding: 36rpx 30rpx;
+}
+
+.ritual-panel,
+.lot-stage,
+.result-card {
+  margin-top: 28rpx;
+}
+
+.topic-grid,
+.mode-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16rpx 0;
+}
+
+.selector-mini {
+  margin-top: 28rpx;
+}
+
+.topic-chip {
+  width: 48.2%;
+}
+
+.mode-chip {
+  width: 31.8%;
+  min-height: 136rpx;
+}
+
+.prompt-chip {
+  margin-top: 22rpx;
+  padding: 22rpx 24rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 246, 232, 0.92);
+  color: #7b573f;
+  font-size: 26rpx;
+  line-height: 1.8;
+}
+
+.lot-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lot-vessel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 480rpx;
+  height: 480rpx;
+  padding: 40rpx;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at top, rgba(255, 236, 204, 0.92) 0%, rgba(200, 136, 69, 0.98) 55%, rgba(125, 53, 24, 1) 100%);
+  box-shadow: 0 26rpx 46rpx rgba(89, 42, 18, 0.2);
+  color: #fff8f1;
+  text-align: center;
+}
+
+.lot-vessel.is-drawing {
+  animation: sway 920ms ease-in-out infinite;
+}
+
+.lot-ring {
+  position: absolute;
+  inset: 26rpx;
+  border-radius: 50%;
+  border: 2rpx solid rgba(255, 244, 227, 0.18);
+}
+
+.lot-title {
+  position: relative;
+  font-size: 42rpx;
+  font-weight: 700;
+  letter-spacing: 3rpx;
+}
+
+.lot-caption {
+  position: relative;
+  width: 72%;
+  margin-top: 18rpx;
+  font-size: 26rpx;
+  line-height: 1.7;
+  opacity: 0.95;
+}
+
+.draw-button {
+  width: 100%;
+  margin-top: 28rpx;
+}
+
+.result-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.lot-level {
+  font-size: 24rpx;
+  letter-spacing: 2rpx;
+  color: #9b5e2d;
+}
+
+.lot-name {
+  margin-top: 10rpx;
+  font-size: 42rpx;
+  font-weight: 700;
+  color: #312116;
+}
+
+.lot-context {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #966033;
+}
+
+.result-badge {
+  flex-shrink: 0;
+  padding: 12rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(163, 99, 47, 0.12);
+  color: #a06130;
+  font-size: 22rpx;
+}
+
+.poem-card {
+  margin-top: 22rpx;
+  padding: 26rpx 24rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 246, 232, 0.92);
+}
+
+.poem-text {
+  margin-top: 12rpx;
+  font-size: 28rpx;
+  line-height: 1.8;
+  color: #4a3123;
+}
+
+.result-section {
+  margin-top: 24rpx;
+}
+
+.meter-list {
+  margin-top: 26rpx;
+}
+
+.meter-item + .meter-item {
+  margin-top: 20rpx;
+}
+
+.meter-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.meter-label {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #3b271a;
+}
+
+.meter-score {
+  font-size: 22rpx;
+  color: #a06130;
+}
+
+.score-bar {
+  height: 14rpx;
+  margin-top: 12rpx;
+  overflow: hidden;
+  border-radius: 999rpx;
+  background: rgba(188, 133, 84, 0.12);
+}
+
+.score-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #e4bf8d 0%, #bf7740 100%);
+}
+
+.result-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-top: 24rpx;
+}
+
+.blessing-text {
+  margin-top: 22rpx;
+  font-size: 24rpx;
+  line-height: 1.8;
+  color: #7b5f4b;
+}
+
+@keyframes sway {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  25% {
+    transform: rotate(-3deg) scale(1.02);
+  }
+
+  75% {
+    transform: rotate(3deg) scale(1.02);
+  }
+
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}

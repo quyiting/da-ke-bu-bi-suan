@@ -1,0 +1,398 @@
+<view class="page-shell yao-page">
+  <view class="hero-card yao-hero">
+    <view class="hero-badge">大可不必算 · 六爻排盘</view>
+    <view class="hero-title">把问题收成一句话，再看月日、用神、世应与六爻怎么落</view>
+    <view class="hero-copy">
+      这一版不只是“起一卦”，而是把六爻做成更像正式纳甲排盘的卦单：你会看到节气换月、月建日辰、旬空、伏神、进退神、反吟伏吟、纳甲、六亲和变卦走向。
+    </view>
+  </view>
+
+  <view class="panel-card selector-card">
+    <view class="section-mini">这次想问</view>
+    <view class="topic-grid">
+      <view
+        wx:for="{{yaoTopics}}"
+        wx:key="id"
+        class="chip-button topic-chip {{selectedTopicId === item.id ? 'active' : ''}}"
+        data-topic-id="{{item.id}}"
+        bindtap="selectTopic"
+      >
+        <view class="chip-title">{{item.label}}</view>
+        <view class="chip-copy">{{item.cue}}</view>
+      </view>
+    </view>
+
+    <view class="section-mini selector-mini">你的问题</view>
+    <view class="guide-panel">
+      <view class="guide-head">
+        <view class="guide-title">问题引导器</view>
+        <view class="guide-copy">先收束到“回应 / 时机 / 去留 / 空间”这一层，卦意会更聚焦。</view>
+      </view>
+      <view class="guide-row">
+        <view
+          wx:for="{{questionGuides}}"
+          wx:key="id"
+          class="guide-chip {{selectedGuideId === item.id ? 'active' : ''}}"
+          data-guide-id="{{item.id}}"
+          bindtap="applyQuestionGuide"
+        >
+          <view class="guide-chip-title">{{item.label}}</view>
+          <view class="guide-chip-copy">{{item.cue}}</view>
+        </view>
+      </view>
+    </view>
+    <textarea
+      class="question-box"
+      maxlength="60"
+      placeholder="例如：这次合作还值得继续推进吗？"
+      value="{{questionInput}}"
+      bindinput="handleQuestionInput"
+    ></textarea>
+
+    <view class="coin-stage">
+      <view class="coin"></view>
+      <view class="coin"></view>
+      <view class="coin"></view>
+    </view>
+    <view class="subtle-note">{{castingText}}</view>
+
+    <button class="primary-button cast-button" bindtap="handleCast" disabled="{{isCasting}}" loading="{{isCasting}}">
+      {{drawButtonText}}
+    </button>
+  </view>
+
+  <view class="fortune-card oracle-card" wx:if="{{result}}">
+    <view class="oracle-top">
+      <view class="oracle-copy">
+        <view class="section-mini">传统排盘</view>
+        <view class="result-title">{{result.originalHexagram.title}}</view>
+        <view class="result-meta-top">
+          {{result.generatedAtLabel}} · {{result.relationProfile.palaceLabel}} {{result.relationProfile.palaceStage}}
+        </view>
+      </view>
+      <view class="oracle-seal">卦</view>
+    </view>
+
+    <view class="result-question">{{result.question}}</view>
+    <view class="result-copy">{{result.overview}}</view>
+
+    <view class="decision-row">
+      <view class="tag" wx:for="{{result.plateHighlights}}" wx:key="*this">{{item}}</view>
+    </view>
+
+    <view class="oracle-visuals">
+      <view class="visual-panel">
+        <view class="visual-label">本卦</view>
+        <view class="hex-stack">
+          <view
+            wx:for="{{result.visualLines.original}}"
+            wx:key="id"
+            class="hex-line-box {{item.isYang ? 'yang' : 'yin'}} {{item.isMoving ? 'moving' : ''}}"
+          ></view>
+        </view>
+        <view class="visual-title">{{result.originalHexagram.title}}</view>
+      </view>
+
+      <view class="visual-divider">之</view>
+
+      <view class="visual-panel">
+        <view class="visual-label">变卦</view>
+        <view class="hex-stack">
+          <view
+            wx:for="{{result.visualLines.changed}}"
+            wx:key="id"
+            class="hex-line-box {{item.isYang ? 'yang' : 'yin'}} {{item.isMoving ? 'changed' : ''}}"
+          ></view>
+        </view>
+        <view class="visual-title">{{result.changedHexagram.title}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="panel-card calendar-card" wx:if="{{result}}">
+    <view class="section-title">起卦信息</view>
+    <view class="calendar-grid">
+      <view class="formal-box calendar-box" wx:for="{{result.calendarPanels}}" wx:key="label">
+        <view class="formal-label">{{item.label}}</view>
+        <view class="formal-value">{{item.value}}</view>
+        <view class="formal-copy">{{item.copy}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="panel-card formal-card" wx:if="{{result}}">
+    <view class="section-title">排盘重点</view>
+    <view class="formal-grid">
+      <view class="formal-box">
+        <view class="formal-label">世应</view>
+        <view class="formal-value">{{result.relationProfile.shiLabel}}世 · {{result.relationProfile.yingLabel}}应</view>
+        <view class="formal-copy">世看自己立场，应看对面与外部反馈。</view>
+      </view>
+      <view class="formal-box">
+        <view class="formal-label">主气</view>
+        <view class="formal-value">{{result.relationProfile.dominantRelation}}</view>
+        <view class="formal-copy">{{result.relationProfile.dominantRelationMeaning}}</view>
+      </view>
+      <view class="formal-box">
+        <view class="formal-label">断语</view>
+        <view class="formal-value">{{result.decision.label}}</view>
+        <view class="formal-copy">{{result.decision.desc}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="panel-card relation-card" wx:if="{{result}}">
+    <view class="section-title">世应细断</view>
+    <view class="formal-grid">
+      <view class="formal-box">
+        <view class="formal-label">互动关系</view>
+        <view class="formal-value">{{result.shiYingProfile.relationLabel}}</view>
+        <view class="formal-copy">{{result.shiYingProfile.relationTone}}</view>
+      </view>
+      <view class="formal-box">
+        <view class="formal-label">谁先动</view>
+        <view class="formal-value">{{result.shiYingProfile.motionLabel}}</view>
+        <view class="formal-copy">{{result.shiYingProfile.motionTone}}</view>
+      </view>
+      <view class="formal-box">
+        <view class="formal-label">强弱位</view>
+        <view class="formal-value">{{result.shiYingProfile.balanceLabel}}</view>
+        <view class="formal-copy">{{result.shiYingProfile.balanceTone}}</view>
+      </view>
+    </view>
+    <view class="result-copy">{{result.shiYingProfile.summary}}</view>
+  </view>
+
+  <view class="panel-card pattern-card" wx:if="{{result.patternProfile.primaryLabel}}">
+    <view class="section-title">反伏与进退</view>
+    <view class="formal-box">
+      <view class="formal-label">格局</view>
+      <view class="formal-value">{{result.patternProfile.primaryLabel}}</view>
+      <view class="formal-copy">{{result.patternProfile.summary}}</view>
+    </view>
+    <view class="moving-list" wx:if="{{result.patternProfile.items.length > 1}}">
+      <view class="moving-item" wx:for="{{result.patternProfile.items}}" wx:key="label">
+        <view class="moving-title">{{item.label}}</view>
+        <view class="moving-body">{{item.summary}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="panel-card timing-card" wx:if="{{result.timingProfile.items.length}}">
+    <view class="section-title">应期细断</view>
+    <view class="formal-box">
+      <view class="formal-label">主看</view>
+      <view class="formal-value">{{result.timingProfile.primaryLabel}}</view>
+      <view class="formal-copy">{{result.timingProfile.summary}}</view>
+    </view>
+    <view class="moving-list">
+      <view class="moving-item" wx:for="{{result.timingProfile.items}}" wx:key="label">
+        <view class="moving-title">{{item.label}}</view>
+        <view class="moving-body">{{item.body}}</view>
+        <view class="subtle-note" wx:if="{{item.nearLabel}}">近应日：{{item.nearLabel}}</view>
+        <view class="subtle-note" wx:if="{{item.farLabel}}">远应月：{{item.farLabel}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="panel-card timeline-card" wx:if="{{result.timingProfile.timeline.length}}">
+    <view class="section-title">应期时间轴</view>
+    <view class="section-desc">先盯最近会应的日点，再看后面会转开的月令。</view>
+    <view class="timeline-list">
+      <view class="timeline-item" wx:for="{{result.timingProfile.timeline}}" wx:key="id">
+        <view class="timeline-rail">
+          <view class="timeline-dot {{item.scope}}"></view>
+          <view class="timeline-line" wx:if="{{index !== result.timingProfile.timeline.length - 1}}"></view>
+        </view>
+        <view class="timeline-card-box">
+          <view class="timeline-meta">
+            <view class="tag">{{item.scopeLabel}}</view>
+            <view class="timeline-date">{{item.label}}</view>
+          </view>
+          <view class="timeline-title">{{item.title}}</view>
+          <view class="timeline-copy">{{item.sourceLabel}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="panel-card yong-card" wx:if="{{result}}">
+    <view class="section-title">用神提要</view>
+    <view class="formal-label">{{result.yongShenProfile.label}}</view>
+    <view class="formal-value">{{result.yongShenProfile.verdictLabel}}</view>
+    <view class="result-copy">{{result.yongShenProfile.verdictBody}}</view>
+
+    <view class="yong-list" wx:if="{{result.yongShenProfile.candidates.length}}">
+      <view class="yong-item" wx:for="{{result.yongShenProfile.candidates}}" wx:key="id">
+        <view class="yong-head">
+          <view class="yong-title">{{item.title}}</view>
+          <view class="yong-tags">
+            <view class="tag" wx:if="{{item.source === 'hidden'}}">伏神</view>
+            <view class="tag">{{item.powerLabel}}</view>
+          </view>
+        </view>
+        <view class="yong-copy">{{item.summary}}</view>
+        <view class="subtle-note" wx:if="{{item.hostTitle}}">所伏之处：{{item.hostTitle}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="panel-card hidden-card" wx:if="{{result.formalLines.hiddenLines.length}}">
+    <view class="section-title">伏神与暗线</view>
+    <view class="moving-list">
+      <view class="moving-item" wx:for="{{result.formalLines.hiddenLines}}" wx:key="id">
+        <view class="moving-title">{{item.title}}</view>
+        <view class="moving-prompt">伏在 {{item.hostTitle || item.hostPositionLabel}}</view>
+        <view class="moving-body">{{item.summary}}。{{item.relationMeaning}}</view>
+        <view class="subtle-note" wx:if="{{item.graveVoidLabel}}">墓绝空破：{{item.graveVoidLabel}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="panel-card plate-card" wx:if="{{result}}">
+    <view class="section-title">纳甲六爻盘</view>
+    <scroll-view class="plate-scroll" scroll-x>
+      <view class="plate-table">
+        <view class="plate-header">
+          <view class="plate-col spirit-col">六神/六兽</view>
+          <view class="plate-col najia-col">纳甲</view>
+          <view class="plate-col relation-col">六亲</view>
+          <view class="plate-col hidden-col">伏神</view>
+          <view class="plate-col state-col">旺衰</view>
+          <view class="plate-col line-col">本爻</view>
+          <view class="plate-col role-col">世应</view>
+          <view class="plate-col changed-col">变爻</view>
+        </view>
+
+        <view class="plate-row" wx:for="{{result.formalLines.rows}}" wx:key="id">
+          <view class="plate-col spirit-col">
+            <view class="spirit-name">{{item.spirit}}</view>
+            <view class="spirit-pos">{{item.positionLabel}}</view>
+          </view>
+
+          <view class="plate-col najia-col">
+            <view class="relation-name">{{item.naJia}}</view>
+            <view class="relation-element">{{item.element}}</view>
+          </view>
+
+          <view class="plate-col relation-col">
+            <view class="relation-name">{{item.relation}}</view>
+            <view class="relation-element">{{item.powerLabel}}</view>
+          </view>
+
+          <view class="plate-col hidden-col">
+            <view class="hidden-name">{{item.hiddenLabel || '—'}}</view>
+            <view class="relation-element" wx:if="{{item.hiddenItems.length}}">{{item.hiddenItems[0].powerLabel}}</view>
+          </view>
+
+          <view class="plate-col state-col">
+            <view class="state-pill {{item.powerScore >= 3 ? 'strong' : item.powerScore < 0 ? 'weak' : 'mid'}}">
+              {{item.monthStateLabel}}
+            </view>
+            <view class="spirit-pos">{{item.monthEffectLabel}} · {{item.dayEffectLabel}}</view>
+            <view class="spirit-pos" wx:if="{{item.graveVoidLabel}}">{{item.graveVoidLabel}}</view>
+            <view class="spirit-pos" wx:if="{{item.transitionLabel}}">{{item.transitionLabel}}</view>
+          </view>
+
+          <view class="plate-col line-col">
+            <view class="plate-line {{item.isYang ? 'yang' : 'yin'}} {{item.isMoving ? 'moving' : ''}}"></view>
+            <view class="line-caption">{{item.typeLabel}}</view>
+          </view>
+
+          <view class="plate-col role-col">
+            <view class="role-badge {{item.hasRole ? 'active' : ''}}">{{item.roleDisplay}}</view>
+          </view>
+
+          <view class="plate-col changed-col">
+            <view class="plate-line {{item.changedIsYang ? 'yang' : 'yin'}} {{item.isMoving ? 'changed' : ''}}"></view>
+            <view class="line-caption">
+              {{item.changedNaJia}} {{item.changedRelation}}<text
+                wx:if="{{item.changedLifeStageLabel === '墓' || item.changedLifeStageLabel === '绝'}}"
+              >
+                · {{item.changedLifeStageLabel}}
+              </text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="panel-card moving-card" wx:if="{{result.hasMovingLines}}">
+    <view class="section-title">动爻提醒</view>
+    <view class="moving-list">
+      <view class="moving-item" wx:for="{{result.movingLines}}" wx:key="label">
+        <view class="moving-title">{{item.label}}</view>
+        <view class="moving-prompt">{{item.prompt}}</view>
+        <view class="moving-body">{{item.body}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="checklist-grid" wx:if="{{result}}">
+    <view class="panel-card checklist-card" wx:for="{{result.reportSections}}" wx:key="title">
+      <view class="section-title">{{item.title}}</view>
+      <view class="result-copy">{{item.body}}</view>
+    </view>
+  </view>
+
+  <view class="panel-card advice-card" wx:if="{{result}}">
+    <view class="section-title">这卦给你的行动建议</view>
+    <view class="bullet-list">
+      <view class="bullet-item" wx:for="{{result.nextActions}}" wx:key="*this">{{item}}</view>
+    </view>
+    <view class="subtle-note">应期提醒：{{result.timingHint}}</view>
+
+    <view class="share-actions">
+      <button class="primary-button share-button" bindtap="handlePosterOpen" loading="{{isPosterGenerating}}">
+        生成海报
+      </button>
+      <button class="secondary-button share-button" open-type="share">转发好友</button>
+    </view>
+  </view>
+
+  <view class="panel-card followup-card" wx:if="{{result}}">
+    <view class="section-title">结果回访</view>
+    <view class="followup-head">
+      <view class="tag review-tag {{activeReviewTone}}">{{activeReviewLabel}}</view>
+      <view class="subtle-note">这条卦已经同步到“我的记录”，后面可以回来改成已应、部分应或暂未应。</view>
+    </view>
+    <view class="review-row">
+      <view
+        wx:for="{{reviewOptions}}"
+        wx:key="id"
+        class="review-chip {{activeReviewStatus === item.id ? 'active' : ''}}"
+        data-status="{{item.id}}"
+        bindtap="handleReviewStatus"
+      >
+        {{item.label}}
+      </view>
+    </view>
+  </view>
+
+  <view class="poster-mask" wx:if="{{posterVisible}}" bindtap="handlePosterClose">
+    <view class="poster-sheet" catchtap="noop">
+      <view class="section-title">分享海报</view>
+      <view class="subtle-note">适合保存到相册后转发，也可以长按图片直接保存。</view>
+
+      <image
+        wx:if="{{posterImage}}"
+        class="poster-image"
+        src="{{posterImage}}"
+        mode="widthFix"
+        show-menu-by-longpress="true"
+      ></image>
+
+      <view wx:else class="poster-loading">正在绘制卦单海报...</view>
+
+      <view class="poster-actions">
+        <button class="primary-button poster-action" bindtap="savePoster" disabled="{{!posterImage}}">
+          保存海报
+        </button>
+        <button class="secondary-button poster-action" bindtap="handlePosterClose">关闭</button>
+      </view>
+    </view>
+  </view>
+
+  <canvas canvas-id="posterCanvas" class="poster-canvas"></canvas>
+</view>

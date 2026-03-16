@@ -1,0 +1,9 @@
+{
+  "name": "fortune-history-sync",
+  "version": "1.0.0",
+  "description": "Cloud history snapshot sync for da-ke-bu-bi-suan",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

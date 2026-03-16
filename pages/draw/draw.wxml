@@ -1,0 +1,124 @@
+<view class="page-shell draw-page">
+  <view class="hero-card draw-hero">
+    <view class="hero-badge">主题抽签</view>
+    <view class="hero-title">先说清楚你在问什么，签才会更像在回应你</view>
+    <view class="hero-copy">
+      这一版把抽签拆成“问什么”和“怎么面对”两层，互动感会比纯随机签更强。
+    </view>
+  </view>
+
+  <view class="panel-card ritual-panel">
+    <view class="section-mini">你现在更想问</view>
+    <view class="topic-grid">
+      <view
+        wx:for="{{drawTopics}}"
+        wx:key="id"
+        class="chip-button topic-chip {{selectedTopicId === item.id ? 'active' : ''}}"
+        data-topic-id="{{item.id}}"
+        bindtap="selectTopic"
+      >
+        <view class="chip-title">{{item.label}}</view>
+        <view class="chip-copy">{{item.cue}}</view>
+      </view>
+    </view>
+
+    <view class="section-mini selector-mini">今天想怎么面对</view>
+    <view class="mode-grid">
+      <view
+        wx:for="{{drawModes}}"
+        wx:key="id"
+        class="chip-button mode-chip {{selectedModeId === item.id ? 'active' : ''}}"
+        data-mode-id="{{item.id}}"
+        bindtap="selectMode"
+      >
+        <view class="chip-title">{{item.label}}</view>
+        <view class="chip-copy">{{item.desc}}</view>
+      </view>
+    </view>
+
+    <view class="prompt-chip">{{currentPrompt}}</view>
+    <view class="subtle-note">{{supportivePrompt}}</view>
+  </view>
+
+  <view class="lot-stage">
+    <view class="lot-vessel {{isDrawing ? 'is-drawing' : ''}}">
+      <view class="lot-ring"></view>
+      <view class="lot-title">玄趣签筒</view>
+      <view class="lot-caption">{{motionText}}</view>
+    </view>
+
+    <button
+      class="primary-button draw-button"
+      bindtap="handleDraw"
+      disabled="{{isDrawing}}"
+      loading="{{isDrawing}}"
+    >
+      {{drawButtonText}}
+    </button>
+  </view>
+
+  <view class="fortune-card result-card" wx:if="{{currentLot}}">
+    <view class="result-head">
+      <view>
+        <view class="lot-level">{{currentLot.level}}</view>
+        <view class="lot-name">{{currentLot.title}}</view>
+        <view class="lot-context">{{currentLot.topic.label}} · {{currentLot.mode.label}}</view>
+      </view>
+      <view class="result-badge">{{currentLot.badge}}</view>
+    </view>
+
+    <view class="keyword-row">
+      <view class="tag" wx:for="{{currentLot.resultTags}}" wx:key="*this">{{item}}</view>
+    </view>
+
+    <view class="poem-card">
+      <view class="section-mini">签文</view>
+      <view class="poem-text">{{currentLot.poem}}</view>
+    </view>
+
+    <view class="meter-list">
+      <view class="meter-item" wx:for="{{currentLot.meters}}" wx:key="label">
+        <view class="meter-top">
+          <view class="meter-label">{{item.label}}</view>
+          <view class="meter-score">{{item.score}}</view>
+        </view>
+        <view class="score-bar">
+          <view class="score-fill" style="width: {{item.score}}%;"></view>
+        </view>
+      </view>
+    </view>
+
+    <view class="result-section">
+      <view class="section-mini">风向解读</view>
+      <view class="result-copy">{{currentLot.summary}}</view>
+      <view class="result-copy">{{currentLot.insight}}</view>
+    </view>
+
+    <view class="result-section">
+      <view class="section-mini">行动建议</view>
+      <view class="bullet-list">
+        <view class="bullet-item" wx:for="{{currentLot.nextActions}}" wx:key="*this">{{item}}</view>
+      </view>
+    </view>
+
+    <view class="result-section">
+      <view class="section-mini">先避一避</view>
+      <view class="result-copy">{{currentLot.avoid}}</view>
+    </view>
+
+    <view class="result-section">
+      <view class="section-mini">仪式提醒</view>
+      <view class="result-copy">{{currentLot.ritual}}</view>
+    </view>
+
+    <view class="result-meta">
+      <view class="tag">适合时段 {{currentLot.luckyMoment}}</view>
+      <view class="tag">能量值 {{currentLot.intensity}}</view>
+      <view class="tag">契合度 {{currentLot.resonance}}</view>
+      <view class="tag">幸运色 {{currentLot.supportColor}}</view>
+      <view class="tag">利方位 {{currentLot.supportDirection}}</view>
+    </view>
+
+    <view class="blessing-text">{{currentLot.blessing}}</view>
+  </view>
+</view>

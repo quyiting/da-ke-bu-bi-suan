@@ -1,0 +1,125 @@
+<view class="page-shell chart-page">
+  <view class="hero-card chart-hero">
+    <view class="hero-badge">星盘原型</view>
+    <view class="hero-title">像“测测”那样先建档，再生成一张更有个人感的星盘报告</view>
+    <view class="hero-copy">
+      这版先做娱乐向轻量星盘：填出生信息，得到太阳、月亮、上升、元素分布和生活重点宫位。
+    </view>
+  </view>
+
+  <view class="panel-card form-card">
+    <view class="section-title">出生信息</view>
+    <view class="section-desc">先录入出生日期、出生时间和出生地。地点会影响上升和宫位风格的生成节奏。</view>
+
+    <view class="form-list">
+      <view class="form-item">
+        <view class="form-label">出生日期</view>
+        <picker mode="date" value="{{birthDate}}" bindchange="handleBirthDateChange">
+          <view class="picker-field">{{birthDate}}</view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">出生时间</view>
+        <picker mode="time" value="{{birthTime}}" bindchange="handleBirthTimeChange">
+          <view class="picker-field">{{birthTime}}</view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">出生地点</view>
+        <picker mode="region" value="{{birthRegion}}" bindchange="handleRegionChange">
+          <view class="picker-field">{{birthRegionLabel}}</view>
+        </picker>
+      </view>
+    </view>
+
+    <button class="primary-button chart-button" bindtap="generateChart">生成我的星盘</button>
+
+    <view class="bullet-list">
+      <view class="bullet-item" wx:for="{{chartIntroTips}}" wx:key="*this">{{item}}</view>
+    </view>
+  </view>
+
+  <view class="fortune-card overview-card" wx:if="{{chartResult}}">
+    <view class="section-mini">星盘摘要</view>
+    <view class="overview-title">{{chartResult.introLine}}</view>
+    <view class="subtle-note">{{chartResult.birthSummary}}</view>
+
+    <view class="core-grid">
+      <view class="metric-box core-box" wx:for="{{chartResult.corePlacements}}" wx:key="label">
+        <view class="core-label">{{item.label}}</view>
+        <view class="core-sign">{{item.sign}}</view>
+        <view class="core-vibe">{{item.vibe}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="panel-card wheel-card" wx:if="{{chartResult}}">
+    <view class="section-title">星盘轮盘</view>
+    <view class="section-desc">用一个更直观的方式把宫位和主要星体铺开，先有感觉，再看解读。</view>
+    <view class="chart-wheel">
+      <view class="wheel-core">{{chartResult.dominantElement.element}}</view>
+      <view class="wheel-house" wx:for="{{chartResult.wheelHouses}}" wx:key="id" style="{{item.style}}">
+        {{item.label}}
+      </view>
+      <view
+        class="wheel-planet"
+        wx:for="{{chartResult.wheelPlanets}}"
+        wx:key="id"
+        style="{{item.style}}z-index:{{item.zIndex}};"
+      >
+        {{item.label}}
+      </view>
+    </view>
+  </view>
+
+  <view class="detail-grid" wx:if="{{chartResult}}">
+    <view class="panel-card detail-card" wx:for="{{chartResult.elementSummary}}" wx:key="element">
+      <view class="section-mini">{{item.element}}</view>
+      <view class="detail-value">{{item.count}} 项</view>
+      <view class="score-bar">
+        <view class="score-fill" style="width: {{item.percent}}%;"></view>
+      </view>
+      <view class="detail-desc">{{item.desc}}</view>
+    </view>
+  </view>
+
+  <view class="panel-card placement-card" wx:if="{{chartResult}}">
+    <view class="section-title">主要落点</view>
+    <view class="placement-list">
+      <view class="placement-item" wx:for="{{chartResult.placements}}" wx:key="id">
+        <view class="placement-top">
+          <view class="placement-title">{{item.label}} · {{item.sign.name}}</view>
+          <view class="tag">{{item.house.label}}</view>
+        </view>
+        <view class="placement-copy">{{item.description}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="panel-card focus-card" wx:if="{{chartResult}}">
+    <view class="section-title">本盘最亮的三个宫位</view>
+    <view class="focus-list">
+      <view class="focus-item" wx:for="{{chartResult.focusHouses}}" wx:key="label">
+        <view class="focus-head">{{item.label}} · {{item.title}}</view>
+        <view class="focus-desc">{{item.desc}}</view>
+        <view class="focus-body">{{item.body}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="checklist-grid" wx:if="{{chartResult}}">
+    <view class="panel-card checklist-card" wx:for="{{chartResult.reportSections}}" wx:key="title">
+      <view class="section-title">{{item.title}}</view>
+      <view class="result-copy">{{item.body}}</view>
+    </view>
+  </view>
+
+  <view class="panel-card advice-card" wx:if="{{chartResult}}">
+    <view class="section-title">接下来可以怎么用</view>
+    <view class="bullet-list">
+      <view class="bullet-item" wx:for="{{chartResult.nextActions}}" wx:key="*this">{{item}}</view>
+    </view>
+  </view>
+</view>
