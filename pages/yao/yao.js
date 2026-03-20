@@ -5,6 +5,7 @@ const { requestHistorySync } = require("../../utils/history-sync");
 
 const POSTER_WIDTH = 620;
 const POSTER_HEIGHT = 1080;
+const PENDING_YAO_INTENT_KEY = "fortune-pending-yao-intent";
 const reviewOptions = [
   { id: "pending", label: "待回看" },
   { id: "partial", label: "部分应" },
@@ -173,14 +174,193 @@ function buildReviewState(status = "pending") {
   };
 }
 
+function buildQuickTiming(result) {
+  const primaryPoint = (result.timingProfile.timeline || [])[0];
+
+  if (primaryPoint) {
+    return {
+      copy: `${primaryPoint.scopeLabel} · ${primaryPoint.title}`,
+      value: primaryPoint.label,
+    };
+  }
+
+  if (result.timingProfile.primaryLabel && result.timingProfile.primaryLabel !== "常规显期") {
+    return {
+      copy: result.timingProfile.summary,
+      value: result.timingProfile.primaryLabel,
+    };
+  }
+
+  return {
+    copy: result.timingHint,
+    value: "先看现实反馈",
+  };
+}
+
+function buildQuickVoice(result) {
+  const label = result.decision.label;
+
+  if (label === "顺势而为") {
+    return "这件事整体是顺的，可以开始往前动。";
+  }
+
+  if (label === "小步试探" || label === "边动边看") {
+    return "可以动，但先别一次推太满。";
+  }
+
+  if (label === "宜缓不宜急") {
+    return "现在不适合硬推，先缓一缓更稳。";
+  }
+
+  if (label === "先稳后动") {
+    return "不是不能动，而是要先把关键条件摸清。";
+  }
+
+  if (label === "先看再定") {
+    return "这卦先别急着给自己下终局判断。";
+  }
+
+  if (label === "暗线待发") {
+    return "机会不是没有，只是答案还没完全浮到台面上。";
+  }
+
+  if (label === "先等暗线") {
+    return "眼下先别逼结果，真正有用的信息还在暗线里。";
+  }
+
+  return "先看眼下最真实的反馈，再决定下一步。";
+}
+
+function buildQuickLead(result) {
+  const label = result.decision.label;
+
+  if (label === "顺势而为") {
+    return "这时候更适合顺着眼前这股劲先做一步，再看外面的回应会不会继续跟上。";
+  }
+
+  if (label === "小步试探" || label === "边动边看") {
+    return "先做一轮轻动作，边看反馈边决定要不要继续加码，会比一口气冲到底更稳。";
+  }
+
+  if (label === "宜缓不宜急") {
+    return "现在更适合等条件补齐、消息落地，别让情绪替你做推进。";
+  }
+
+  if (label === "先稳后动") {
+    return "先把真正能承接这件事的条件找出来，后面的判断会清楚很多。";
+  }
+
+  if (label === "先看再定") {
+    return "眼下还不够亮，先别急着下重结论，回到世应和动爻给你的现实反馈就好。";
+  }
+
+  if (label === "暗线待发" || label === "先等暗线") {
+    return "先盯消息、补资料、幕后条件和真实态度变化，不要只盯表面一句话。";
+  }
+
+  return result.decision.desc || result.overview;
+}
+
+function buildQuickActionValue(result) {
+  const primaryAction = result.nextActions[0] || "";
+
+  if (primaryAction.includes("暗线")) {
+    return "先找暗线证据";
+  }
+
+  if (primaryAction.includes("现实条件") || primaryAction.includes("确认")) {
+    return "先确认现实条件";
+  }
+
+  if (primaryAction.includes("节奏")) {
+    return "先对齐节奏";
+  }
+
+  if (primaryAction.includes("守住")) {
+    return "先想清底线";
+  }
+
+  if (primaryAction.includes("最能产生反馈")) {
+    return "先做最小动作";
+  }
+
+  if (primaryAction.includes("不要")) {
+    return "先别急着定";
+  }
+
+  return "先做一条轻动作";
+}
+
+function buildDisplayResult(result) {
+  const quickTiming = buildQuickTiming(result);
+
+  return {
+    ...result,
+    quickLead: buildQuickLead(result),
+    quickPanels: [
+      {
+        copy: result.decision.desc,
+        label: "现在更像",
+        value: result.yongShenProfile.verdictLabel,
+      },
+      {
+        copy: result.nextActions[1] || "先做一条轻动作，再等局面给你反馈。",
+        label: "你先做",
+        value: buildQuickActionValue(result),
+      },
+      {
+        copy: quickTiming.copy,
+        label: "先盯时间",
+        value: quickTiming.value,
+      },
+    ],
+    quickTags: [result.topic.label, result.decision.label]
+      .concat(result.timingProfile.primaryLabel && result.timingProfile.primaryLabel !== "常规显期"
+        ? [result.timingProfile.primaryLabel]
+        : [])
+      .slice(0, 3),
+    quickVoice: buildQuickVoice(result),
+  };
+}
+
+function consumePendingIntent(page) {
+  const pendingIntent = wx.getStorageSync(PENDING_YAO_INTENT_KEY);
+
+  if (!pendingIntent || !pendingIntent.topicId) {
+    return;
+  }
+
+  wx.removeStorageSync(PENDING_YAO_INTENT_KEY);
+  const topic = getTopicById(pendingIntent.topicId);
+  const guides = topic.questionGuides || [];
+  const guide = pendingIntent.guideId
+    ? guides.find((item) => item.id === pendingIntent.guideId) || null
+    : null;
+
+  page.setData({
+    activeRecordId: "",
+    ...buildReviewState("pending"),
+    castingText: guide ? `已替你把问题收束到“${guide.label}”，这卦会更好读。` : topic.settleHint,
+    drawButtonText: "立即起卦",
+    posterImage: "",
+    posterVisible: false,
+    questionGuides: guides,
+    questionInput: pendingIntent.questionInput || (guide ? guide.template : topic.prompt),
+    result: null,
+    selectedGuideId: guide ? guide.id : "",
+    selectedTopicId: topic.id,
+    showDetailedResult: false,
+  });
+}
+
 Page({
   data: {
     activeRecordId: "",
     activeReviewLabel: buildReviewState().activeReviewLabel,
     activeReviewStatus: buildReviewState().activeReviewStatus,
     activeReviewTone: buildReviewState().activeReviewTone,
-    castingText: "静心三息，再起一卦。",
-    drawButtonText: "起卦",
+    castingText: "先把问题收成一句话，再起一卦。",
+    drawButtonText: "立即起卦",
     isCasting: false,
     isPosterGenerating: false,
     posterImage: "",
@@ -191,7 +371,12 @@ Page({
     result: null,
     selectedGuideId: "",
     selectedTopicId: yaoTopics[0].id,
+    showDetailedResult: false,
     yaoTopics,
+  },
+
+  onShow() {
+    consumePendingIntent(this);
   },
 
   selectTopic(event) {
@@ -204,6 +389,7 @@ Page({
 
     this.setData({
       castingText: nextTopic.settleHint,
+      questionInput: "",
       questionGuides: nextTopic.questionGuides || [],
       selectedGuideId: "",
       selectedTopicId: topicId,
@@ -219,7 +405,7 @@ Page({
     }
 
     this.setData({
-      castingText: `已帮你把问题收束到“${guide.label}”这一层，起卦时会更聚焦。`,
+      castingText: `已替你把问题收束到“${guide.label}”，这卦会更好读。`,
       questionInput: guide.template,
       selectedGuideId: guide.id,
     });
@@ -243,17 +429,18 @@ Page({
     this.setData({
       activeRecordId: "",
       ...buildReviewState("pending"),
-      castingText: "铜钱已落，请稍候片刻。",
+      castingText: "卦在路上，先别急着替它下结论。",
       drawButtonText: "起卦中",
       isCasting: true,
       isPosterGenerating: false,
       posterImage: "",
       posterVisible: false,
       result: null,
+      showDetailedResult: false,
     });
 
     this.castTimer = setTimeout(() => {
-      const result = buildSixYaoReading(this.data.selectedTopicId, questionText);
+      const result = buildDisplayResult(buildSixYaoReading(this.data.selectedTopicId, questionText));
       const historyEntry = createHistoryEntry("yao", {
         badge: `${result.changedHexagram.title} · ${result.decision.label}`,
         question: result.question,
@@ -273,13 +460,19 @@ Page({
 
       this.setData({
         activeRecordId: historyEntry.id,
-        castingText: "本卦已成，可先看月日与用神，再细读每一爻。",
-        drawButtonText: "再起一卦",
+        castingText: "先看一句结果。要不要展开详细盘，等你自己决定。",
+        drawButtonText: "再问一件事",
         isCasting: false,
         questionInput: result.question,
         result,
       });
     }, 1200);
+  },
+
+  handleDetailToggle() {
+    this.setData({
+      showDetailedResult: !this.data.showDetailedResult,
+    });
   },
 
   handleReviewStatus(event) {

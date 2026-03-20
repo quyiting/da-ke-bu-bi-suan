@@ -1,113 +1,78 @@
 <view class="page-shell index-page">
-  <view class="hero-card hero-panel">
-    <view class="hero-badge">大可不必算</view>
-    <view class="hero-title">不只是看一句签，而是让你愿意一次次点进来</view>
-    <view class="hero-copy">
-      这一轮把导航、内容密度和玩法个性化都加厚了。现在你可以先选题，再问签，也能在记录页看到自己的使用倾向。
+  <view class="hero-card ask-hero">
+    <view class="hero-badge">今日入口</view>
+    <view class="brand-cover">
+      <view class="brand-mark">算</view>
+      <view class="brand-copy-wrap">
+        <view class="brand-name">大可不必算</view>
+        <view class="brand-tagline">问一件当下的事，先听一句清楚的话。</view>
+      </view>
     </view>
-    <view class="metric-strip hero-metrics">
+    <view class="hero-title">今天最想问什么</view>
+    <view class="hero-copy">{{topNotice}}</view>
+
+    <view class="hero-promise-row">
+      <view class="hero-promise-chip">先给一句结果</view>
+      <view class="hero-promise-chip">需要时再看详细盘</view>
+    </view>
+
+    <view class="shortcut-grid home-shortcuts">
+      <view
+        wx:for="{{shortcutPresets}}"
+        wx:key="id"
+        class="shortcut-item {{selectedShortcutId === item.id ? 'active' : ''}}"
+        data-shortcut-id="{{item.id}}"
+        bindtap="handleSelectShortcut"
+      >
+        <view class="shortcut-title">{{item.title}}</view>
+        <view class="shortcut-copy">{{item.copy}}</view>
+      </view>
+    </view>
+
+    <view class="starter-panel">
+      <view class="starter-head">
+        <view class="section-mini">当前准备问</view>
+        <view class="starter-kicker">{{activeShortcut.topicLabel}} · {{activeShortcut.guideLabel}}</view>
+      </view>
+      <view class="starter-title">{{activeShortcut.title}}</view>
+      <view class="starter-quote">“{{activeShortcut.questionTemplate}}”</view>
+    </view>
+
+    <button class="primary-button start-button" bindtap="handleStartYao">立即起卦</button>
+
+    <view class="utility-grid mini-link-grid">
+      <view
+        wx:for="{{utilityCards}}"
+        wx:key="title"
+        class="utility-item mini-link-card"
+        data-mode="{{item.mode}}"
+        data-url="{{item.url}}"
+        bindtap="handleOpenUtility"
+      >
+        <view class="feature-tag">{{item.tag}}</view>
+        <view class="utility-title">{{item.title}}</view>
+        <view class="utility-action">{{item.action}}</view>
+      </view>
+    </view>
+
+    <view class="metric-strip summary-strip hero-metrics">
       <view class="metric-box" wx:for="{{summaryCards}}" wx:key="label">
         <view class="metric-value">{{item.value}}</view>
         <view class="metric-label">{{item.label}}</view>
       </view>
     </view>
-    <view class="hero-actions">
-      <navigator class="primary-button hero-action" url="/pages/draw/draw" open-type="switchTab">立即问签</navigator>
-      <navigator class="secondary-button hero-action" url="/pages/yao/yao" open-type="switchTab">起一卦</navigator>
+  </view>
+
+  <view class="fortune-card recent-card">
+    <view class="recent-topline">
+      <view class="section-mini">{{recentCard.eyebrow}}</view>
+      <view class="recent-badge">继续这里</view>
     </view>
-  </view>
-
-  <view class="fortune-card recommend-card">
-    <view class="section-mini">今日推荐玩法</view>
-    <view class="recommend-title">{{recommendation.title}}</view>
-    <view class="result-copy">{{recommendation.desc}}</view>
-    <navigator class="primary-button recommend-action" url="{{recommendation.url}}" open-type="switchTab">
-      {{recommendation.action}}
-    </navigator>
-  </view>
-
-  <view class="fortune-card today-card">
-    <view class="section-title">今日气场</view>
-    <view class="today-quote">{{todayHighlight.quote}}</view>
-    <view class="today-tags">
-      <view class="tag">主线 {{todayHighlight.focus}}</view>
-      <view class="tag">幸运色 {{todayHighlight.color}}</view>
-      <view class="tag">适合时段 {{todayHighlight.luckyTime}}</view>
-      <view class="tag">能量 {{todayHighlight.energy}}</view>
+    <view class="recent-title">{{recentCard.title}}</view>
+    <view class="recent-copy">{{recentCard.body}}</view>
+    <view class="keyword-row">
+      <view class="tag" wx:for="{{recentCard.tags}}" wx:key="*this">{{item}}</view>
     </view>
-    <view class="today-source">{{todayHighlight.source}}</view>
-  </view>
-
-  <view class="section-header">
-    <view class="section-title">今天怎么玩</view>
-    <view class="section-desc">现在不只是三个入口，而是三种不同强度的体验：看整体、问具体、再回头复盘。</view>
-  </view>
-
-  <view class="feature-list">
-    <navigator
-      wx:for="{{featureCards}}"
-      wx:key="url"
-      class="feature-card feature-item"
-      url="{{item.url}}"
-      open-type="switchTab"
-    >
-      <view class="feature-tag">{{item.tag}}</view>
-      <view class="feature-title">{{item.title}}</view>
-      <view class="feature-desc">{{item.desc}}</view>
-      <view class="feature-footer">{{item.cta}}</view>
-    </navigator>
-  </view>
-
-  <view class="section-header">
-    <view class="section-title">三种打开节奏</view>
-    <view class="section-desc">这不是在堆页面，而是在给用户一个更自然的使用路径。</view>
-  </view>
-
-  <view class="journey-list">
-    <navigator
-      wx:for="{{homeJourneyCards}}"
-      wx:key="title"
-      class="panel-card journey-item"
-      url="{{item.url}}"
-      open-type="switchTab"
-    >
-      <view class="journey-title">{{item.title}}</view>
-      <view class="journey-desc">{{item.desc}}</view>
-      <view class="journey-action">{{item.action}}</view>
-    </navigator>
-  </view>
-
-  <view class="panel-card ritual-card">
-    <view class="section-title">进入状态的小仪式</view>
-    <view class="ritual-list">
-      <view class="ritual-item" wx:for="{{ritualSteps}}" wx:key="title">
-        <view class="ritual-index">0{{index + 1}}</view>
-        <view class="ritual-body">
-          <view class="ritual-title">{{item.title}}</view>
-          <view class="ritual-desc">{{item.desc}}</view>
-        </view>
-      </view>
-    </view>
-  </view>
-
-  <view class="history-card recent-card">
-    <view class="section-title">最近一条记录</view>
-    <block wx:if="{{recentEntry}}">
-      <view class="recent-head">
-        <view class="keyword-row">
-          <view class="tag">{{recentEntry.typeLabel}}</view>
-          <view class="tag" wx:if="{{recentEntry.reviewLabel}}">{{recentEntry.reviewLabel}}</view>
-        </view>
-        <view class="recent-time">{{recentEntry.dateLabel}}</view>
-      </view>
-      <view class="recent-title">{{recentEntry.title}}</view>
-      <view class="recent-subtitle">{{recentEntry.subtitle}}</view>
-      <view class="recent-summary">{{recentEntry.summary}}</view>
-      <navigator class="secondary-button profile-action" url="/pages/profile/profile" open-type="switchTab">去我的记录</navigator>
-    </block>
-    <block wx:else>
-      <view class="section-desc">还没有历史记录，先抽一支签会更有感觉。</view>
-      <navigator class="primary-button profile-action" url="/pages/draw/draw" open-type="switchTab">从第一支签开始</navigator>
-    </block>
+    <button class="secondary-button recent-action" bindtap="handleOpenRecent">{{recentCard.actionLabel}}</button>
   </view>
 </view>

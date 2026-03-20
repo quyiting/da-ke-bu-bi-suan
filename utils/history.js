@@ -3,7 +3,7 @@ const STORAGE_KEY = "fortune-history";
 const TYPE_LABELS = {
   chart: "星盘",
   draw: "抽签",
-  yao: "六爻",
+  yao: "问事",
 };
 const SYNC_STATUS_META = {
   failed: {
@@ -88,6 +88,7 @@ function decorateEntry(entry) {
     syncedLabel: syncedAt ? formatRecordTime(syncedAt) : "",
     timingPreview: safeEntry.timingPreview || "",
     topicLabel: safeEntry.topicLabel || "",
+    typeLabel: TYPE_LABELS[safeEntry.type] || safeEntry.typeLabel || "记录",
     updatedAt,
   };
 }
@@ -346,8 +347,7 @@ function summarizeHistory(history = getHistory()) {
   let favoriteTypeLabel = "两边都在看";
   const typedCounts = [
     { type: "draw", label: "更常问签", count: drawCount },
-    { type: "yao", label: "更常起六爻", count: yaoCount },
-    { type: "chart", label: "更常看星盘", count: chartCount },
+    { type: "yao", label: "更常问事", count: yaoCount },
   ].sort((left, right) => right.count - left.count);
 
   if (!total) {
@@ -361,13 +361,11 @@ function summarizeHistory(history = getHistory()) {
   let nextSuggestion = "先从一支主题签开始，最容易得到第一条记录。";
 
   if (pendingReviewCount) {
-    nextSuggestion = `你还有 ${pendingReviewCount} 条六爻在等回访，过几天回来对照“已应 / 部分应 / 暂未应”，产品会更像真的陪你复盘。`;
+    nextSuggestion = `你还有 ${pendingReviewCount} 条问事结果在等回访，过几天回来对照一次，会更像真的在复盘。`;
   } else if (favoriteType === "draw") {
-    nextSuggestion = "你最近更偏向问签收提醒，这时候补一卦六爻，会更适合判断“这件事到底该不该动”。";
+    nextSuggestion = "你最近更偏向先听提醒，这时候补一卦问事，会更适合判断“这件事到底该不该动”。";
   } else if (favoriteType === "yao") {
-    nextSuggestion = "你最近更偏向起卦做判断，这时候补一支主题签，会让体验多一点情绪安放和分享感。";
-  } else if (favoriteType === "chart") {
-    nextSuggestion = "你已经开始形成个人报告型使用习惯了，接下来适合把星盘、六爻和抽签串起来做更完整的内容链路。";
+    nextSuggestion = "你最近更偏向直接做判断，这时候补一支签，会让体验多一点缓冲和提醒。";
   } else if (favoriteType === "balanced" && total) {
     nextSuggestion = "记录已经比较均衡了，下一步适合回看最近在反复问什么，做更深的复盘。";
   }

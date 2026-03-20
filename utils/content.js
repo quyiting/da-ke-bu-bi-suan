@@ -14,16 +14,9 @@ const featureCards = [
     url: "/pages/yao/yao",
   },
   {
-    tag: "像测测的建档感",
-    title: "轻量星盘",
-    desc: "输入出生日期、时间和地点，先做出太阳、月亮、上升和宫位重心，给产品加上更强的个人化报告感。",
-    cta: "生成我的星盘",
-    url: "/pages/chart/chart",
-  },
-  {
     tag: "适合沉淀复盘",
     title: "我的记录",
-    desc: "把最近问过的签、起过的卦和看过的星盘留在本地，顺手形成你的使用画像，也为后续会员和收藏打底。",
+    desc: "把最近问过的签、起过的卦留在本地，顺手形成你的使用画像，也为后续会员和收藏打底。",
     cta: "打开我的记录",
     url: "/pages/profile/profile",
   },
@@ -47,12 +40,6 @@ const homeJourneyCards = [
     desc: "回到记录页看自己最近反复在问什么，这类复盘是后续做会员内容的基础。",
     action: "回看记录",
     url: "/pages/profile/profile",
-  },
-  {
-    title: "初次建档",
-    desc: "第一次进入时就录入出生信息，星盘会把产品从随机内容拉向更强的个人报告体验。",
-    action: "生成星盘",
-    url: "/pages/chart/chart",
   },
 ];
 

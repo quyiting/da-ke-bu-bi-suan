@@ -3,7 +3,6 @@
     "pages/index/index",
     "pages/draw/draw",
     "pages/yao/yao",
-    "pages/chart/chart",
     "pages/profile/profile"
   ],
   "window": {
@@ -24,16 +23,8 @@
         "text": "首页"
       },
       {
-        "pagePath": "pages/draw/draw",
-        "text": "抽签"
-      },
-      {
         "pagePath": "pages/yao/yao",
-        "text": "六爻"
-      },
-      {
-        "pagePath": "pages/chart/chart",
-        "text": "星盘"
+        "text": "问事"
       },
       {
         "pagePath": "pages/profile/profile",

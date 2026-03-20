@@ -1,16 +1,128 @@
 <view class="page-shell profile-page">
   <view class="hero-card profile-hero">
     <view class="hero-badge">我的记录</view>
-    <view class="hero-title">把抽过的签、起过的卦和自己的偏好都留在这里</view>
-    <view class="hero-copy">
-      这一版加上了筛选和轻画像，记录页不只是“历史列表”，也开始像一个能承接复盘和会员升级的地方。
+    <view class="hero-title">最近问过什么，都在这里</view>
+    <view class="hero-copy">先看最近结果和回访，需要时再处理同步就够了。</view>
+  </view>
+
+  <view class="panel-card stats-card">
+    <view class="stats-grid">
+      <view class="stat-item">
+        <view class="stat-value">{{summary.total}}</view>
+        <view class="stat-label">总记录</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{summary.drawCount}}</view>
+        <view class="stat-label">抽签</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{summary.yaoCount}}</view>
+        <view class="stat-label">问事</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{summary.pendingReviewCount}}</view>
+        <view class="stat-label">待回看</view>
+      </view>
     </view>
+    <view class="record-brief">
+      <view class="record-brief-title">{{summary.favoriteTypeLabel}}</view>
+      <view class="record-brief-copy">{{summary.nextSuggestion}}</view>
+    </view>
+    <view class="keyword-row">
+      <view class="tag">今日新增 {{summary.todayCount}}</view>
+      <view class="tag">探索 {{summary.exploreDays}} 天</view>
+      <view class="tag">最近更新 {{summary.lastUpdated}}</view>
+    </view>
+  </view>
+
+  <view class="panel-card revisit-card">
+    <view class="section-title">回访状态</view>
+    <view class="stats-grid revisit-grid">
+      <view class="stat-item revisit-item">
+        <view class="stat-value">{{summary.pendingReviewCount}}</view>
+        <view class="stat-label">待回看</view>
+      </view>
+      <view class="stat-item revisit-item">
+        <view class="stat-value">{{summary.partialReviewCount}}</view>
+        <view class="stat-label">部分应</view>
+      </view>
+      <view class="stat-item revisit-item">
+        <view class="stat-value">{{summary.matchedReviewCount}}</view>
+        <view class="stat-label">已应</view>
+      </view>
+      <view class="stat-item revisit-item">
+        <view class="stat-value">{{summary.unmetReviewCount}}</view>
+        <view class="stat-label">暂未应</view>
+      </view>
+    </view>
+    <view class="stats-tip">隔几天回来标一次，比看完就走更容易留下“有没有应”的感觉。</view>
+  </view>
+
+  <view class="history-card history-list-card">
+    <view class="history-top">
+      <view class="section-title">最近记录</view>
+      <view class="history-time">本机视图</view>
+    </view>
+
+    <view class="filter-row">
+      <view
+        wx:for="{{filterOptions}}"
+        wx:key="id"
+        class="filter-chip {{activeFilter === item.id ? 'active' : ''}}"
+        data-filter="{{item.id}}"
+        bindtap="setFilter"
+      >
+        {{item.label}}
+      </view>
+    </view>
+
+    <block wx:if="{{filteredHistory.length}}">
+      <view class="history-item" wx:for="{{filteredHistory}}" wx:key="id">
+        <view class="history-item-head">
+          <view class="tag">{{item.typeLabel}}</view>
+          <view class="history-time">{{item.dateLabel}}</view>
+        </view>
+        <view class="history-title">{{item.title}}</view>
+        <view class="history-subtitle" wx:if="{{item.subtitle}}">{{item.subtitle}}</view>
+        <view class="history-subtitle" wx:if="{{item.questionGuideLabel}}">问法：{{item.questionGuideLabel}}</view>
+        <view class="history-question" wx:if="{{item.question}}">问题：{{item.question}}</view>
+        <view class="history-summary">{{item.summary}}</view>
+        <view class="history-badge" wx:if="{{item.badge}}">{{item.badge}}</view>
+        <view class="history-review" wx:if="{{item.type === 'yao'}}">
+          <view class="tag review-tag {{item.reviewTone}}">{{item.reviewLabel}}</view>
+          <view class="history-time" wx:if="{{item.reviewUpdatedLabel}}">回访于 {{item.reviewUpdatedLabel}}</view>
+        </view>
+        <view class="history-timing" wx:if="{{item.timingPreview}}">{{item.timingPreview}}</view>
+        <view class="review-row" wx:if="{{item.type === 'yao'}}">
+          <view
+            wx:for="{{reviewOptions}}"
+            wx:key="id"
+            wx:for-item="option"
+            class="review-chip {{item.reviewStatus === option.id ? 'active' : ''}}"
+            data-id="{{item.id}}"
+            data-status="{{option.id}}"
+            bindtap="handleReviewStatus"
+          >
+            {{option.label}}
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <block wx:else>
+      <view class="empty-state">这个筛选条件下还没有记录，换一个筛选，或者先去抽一签、问一件事。</view>
+    </block>
+  </view>
+
+  <view class="panel-card entry-card">
+    <navigator class="primary-button entry-button" url="/pages/yao/yao" open-type="switchTab">继续问事</navigator>
+    <navigator class="secondary-button entry-button" url="/pages/draw/draw" open-type="navigate">抽一签</navigator>
   </view>
 
   <view class="panel-card account-card">
     <view class="account-top">
       <view class="account-copy-wrap">
-        <view class="section-title">账号与同步</view>
+        <view class="section-title">同步与备份</view>
         <view class="account-value">{{accountState.modeLabel}}</view>
         <view class="account-copy">{{accountState.statusCopy}}</view>
       </view>
@@ -81,122 +193,5 @@
     <view class="subtle-note" wx:if="{{accountState.autoPushBlocked}}">
       你刚刚清空过云端记录，所以系统不会自动把本机内容重新上传。只有主动点“恢复云端备份”，才会重新开始云端备份。
     </view>
-  </view>
-
-  <view class="panel-card stats-card">
-    <view class="stats-grid">
-      <view class="stat-item">
-        <view class="stat-value">{{summary.total}}</view>
-        <view class="stat-label">总记录</view>
-      </view>
-      <view class="stat-item">
-        <view class="stat-value">{{summary.drawCount}}</view>
-        <view class="stat-label">抽签</view>
-      </view>
-      <view class="stat-item">
-        <view class="stat-value">{{summary.yaoCount}}</view>
-        <view class="stat-label">六爻</view>
-      </view>
-      <view class="stat-item">
-        <view class="stat-value">{{summary.chartCount}}</view>
-        <view class="stat-label">星盘</view>
-      </view>
-    </view>
-    <view class="stats-tip">最近更新：{{summary.lastUpdated}}</view>
-  </view>
-
-  <view class="panel-card insight-card">
-    <view class="section-title">你的使用画像</view>
-    <view class="insight-value">{{summary.favoriteTypeLabel}}</view>
-    <view class="section-desc">{{summary.nextSuggestion}}</view>
-    <view class="keyword-row">
-      <view class="tag">今日新增 {{summary.todayCount}}</view>
-      <view class="tag">累计 {{summary.total}} 条</view>
-      <view class="tag">探索 {{summary.exploreDays}} 天</view>
-    </view>
-  </view>
-
-  <view class="panel-card revisit-card">
-    <view class="section-title">结果回访</view>
-    <view class="stats-grid revisit-grid">
-      <view class="stat-item revisit-item">
-        <view class="stat-value">{{summary.pendingReviewCount}}</view>
-        <view class="stat-label">待回看</view>
-      </view>
-      <view class="stat-item revisit-item">
-        <view class="stat-value">{{summary.partialReviewCount}}</view>
-        <view class="stat-label">部分应</view>
-      </view>
-      <view class="stat-item revisit-item">
-        <view class="stat-value">{{summary.matchedReviewCount}}</view>
-        <view class="stat-label">已应</view>
-      </view>
-      <view class="stat-item revisit-item">
-        <view class="stat-value">{{summary.unmetReviewCount}}</view>
-        <view class="stat-label">暂未应</view>
-      </view>
-    </view>
-    <view class="stats-tip">六爻不是只看当下。隔几天回来标一次，应验感会比“看完就走”强很多。</view>
-  </view>
-
-  <view class="history-card history-list-card">
-    <view class="history-top">
-      <view class="section-title">最近记录</view>
-      <view class="history-time">本机视图</view>
-    </view>
-
-    <view class="filter-row">
-      <view
-        wx:for="{{filterOptions}}"
-        wx:key="id"
-        class="filter-chip {{activeFilter === item.id ? 'active' : ''}}"
-        data-filter="{{item.id}}"
-        bindtap="setFilter"
-      >
-        {{item.label}}
-      </view>
-    </view>
-
-    <block wx:if="{{filteredHistory.length}}">
-      <view class="history-item" wx:for="{{filteredHistory}}" wx:key="id">
-        <view class="history-item-head">
-          <view class="tag">{{item.typeLabel}}</view>
-          <view class="history-time">{{item.dateLabel}}</view>
-        </view>
-        <view class="history-title">{{item.title}}</view>
-        <view class="history-subtitle" wx:if="{{item.subtitle}}">{{item.subtitle}}</view>
-        <view class="history-subtitle" wx:if="{{item.questionGuideLabel}}">问法：{{item.questionGuideLabel}}</view>
-        <view class="history-question" wx:if="{{item.question}}">问题：{{item.question}}</view>
-        <view class="history-summary">{{item.summary}}</view>
-        <view class="history-badge" wx:if="{{item.badge}}">{{item.badge}}</view>
-        <view class="history-review" wx:if="{{item.type === 'yao'}}">
-          <view class="tag review-tag {{item.reviewTone}}">{{item.reviewLabel}}</view>
-          <view class="history-time" wx:if="{{item.reviewUpdatedLabel}}">回访于 {{item.reviewUpdatedLabel}}</view>
-        </view>
-        <view class="history-timing" wx:if="{{item.timingPreview}}">{{item.timingPreview}}</view>
-        <view class="review-row" wx:if="{{item.type === 'yao'}}">
-          <view
-            wx:for="{{reviewOptions}}"
-            wx:key="id"
-            wx:for-item="option"
-            class="review-chip {{item.reviewStatus === option.id ? 'active' : ''}}"
-            data-id="{{item.id}}"
-            data-status="{{option.id}}"
-            bindtap="handleReviewStatus"
-          >
-            {{option.label}}
-          </view>
-        </view>
-      </view>
-    </block>
-
-    <block wx:else>
-      <view class="empty-state">这个筛选条件下还没有记录，换一个筛选或者先去抽一签、起一卦。</view>
-    </block>
-  </view>
-
-  <view class="panel-card entry-card">
-    <navigator class="primary-button entry-button" url="/pages/yao/yao" open-type="switchTab">起六爻</navigator>
-    <navigator class="secondary-button entry-button" url="/pages/chart/chart" open-type="switchTab">看星盘</navigator>
   </view>
 </view>

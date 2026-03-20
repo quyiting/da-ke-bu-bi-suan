@@ -1,34 +1,42 @@
 <view class="page-shell yao-page">
   <view class="hero-card yao-hero">
-    <view class="hero-badge">大可不必算 · 六爻排盘</view>
-    <view class="hero-title">把问题收成一句话，再看月日、用神、世应与六爻怎么落</view>
-    <view class="hero-copy">
-      这一版不只是“起一卦”，而是把六爻做成更像正式纳甲排盘的卦单：你会看到节气换月、月建日辰、旬空、伏神、进退神、反吟伏吟、纳甲、六亲和变卦走向。
-    </view>
+    <view class="hero-badge">大可不必算 · 问事</view>
+    <view class="hero-title">先问一句</view>
+    <view class="hero-copy">先看一句结果、一个建议和一个时间点。更细的盘，等你想看时再展开。</view>
   </view>
 
   <view class="panel-card selector-card">
-    <view class="section-mini">这次想问</view>
-    <view class="topic-grid">
-      <view
-        wx:for="{{yaoTopics}}"
-        wx:key="id"
-        class="chip-button topic-chip {{selectedTopicId === item.id ? 'active' : ''}}"
-        data-topic-id="{{item.id}}"
-        bindtap="selectTopic"
-      >
-        <view class="chip-title">{{item.label}}</view>
-        <view class="chip-copy">{{item.cue}}</view>
+    <view class="selector-stage">
+      <view class="selector-head">
+        <view class="selector-index">01</view>
+        <view class="selector-copy">
+          <view class="section-mini">先选方向</view>
+          <view class="selector-desc">先决定你现在更像在问关系、工作、选择，还是时机。</view>
+        </view>
+      </view>
+      <view class="topic-grid">
+        <view
+          wx:for="{{yaoTopics}}"
+          wx:key="id"
+          class="chip-button topic-chip {{selectedTopicId === item.id ? 'active' : ''}}"
+          data-topic-id="{{item.id}}"
+          bindtap="selectTopic"
+        >
+          <view class="chip-title">{{item.label}}</view>
+          <view class="chip-copy">{{item.cue}}</view>
+        </view>
       </view>
     </view>
 
-    <view class="section-mini selector-mini">你的问题</view>
-    <view class="guide-panel">
-      <view class="guide-head">
-        <view class="guide-title">问题引导器</view>
-        <view class="guide-copy">先收束到“回应 / 时机 / 去留 / 空间”这一层，卦意会更聚焦。</view>
+    <view class="selector-stage">
+      <view class="selector-head">
+        <view class="selector-index">02</view>
+        <view class="selector-copy">
+          <view class="section-mini">再选问法</view>
+          <view class="selector-desc">把问题收到一个角度，结果会比泛泛地问更清楚。</view>
+        </view>
       </view>
-      <view class="guide-row">
+      <view class="guide-row compact-guide-row">
         <view
           wx:for="{{questionGuides}}"
           wx:key="id"
@@ -41,86 +49,135 @@
         </view>
       </view>
     </view>
-    <textarea
-      class="question-box"
-      maxlength="60"
-      placeholder="例如：这次合作还值得继续推进吗？"
-      value="{{questionInput}}"
-      bindinput="handleQuestionInput"
-    ></textarea>
 
-    <view class="coin-stage">
-      <view class="coin"></view>
-      <view class="coin"></view>
-      <view class="coin"></view>
-    </view>
-    <view class="subtle-note">{{castingText}}</view>
-
-    <button class="primary-button cast-button" bindtap="handleCast" disabled="{{isCasting}}" loading="{{isCasting}}">
-      {{drawButtonText}}
-    </button>
-  </view>
-
-  <view class="fortune-card oracle-card" wx:if="{{result}}">
-    <view class="oracle-top">
-      <view class="oracle-copy">
-        <view class="section-mini">传统排盘</view>
-        <view class="result-title">{{result.originalHexagram.title}}</view>
-        <view class="result-meta-top">
-          {{result.generatedAtLabel}} · {{result.relationProfile.palaceLabel}} {{result.relationProfile.palaceStage}}
+    <view class="selector-stage">
+      <view class="selector-head">
+        <view class="selector-index">03</view>
+        <view class="selector-copy">
+          <view class="section-mini">把问题补成一句话</view>
+          <view class="selector-desc">别问太大，只问你眼前最在意的这一件事。</view>
         </view>
       </view>
-      <view class="oracle-seal">卦</view>
+      <textarea
+        class="question-box"
+        maxlength="60"
+        placeholder="例如：这次合作还值得继续推进吗？"
+        value="{{questionInput}}"
+        bindinput="handleQuestionInput"
+      ></textarea>
+
+      <view class="cast-panel">
+        <button class="primary-button cast-button" bindtap="handleCast" disabled="{{isCasting}}" loading="{{isCasting}}">
+          {{drawButtonText}}
+        </button>
+        <view class="subtle-note selector-tip">{{castingText}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="fortune-card quick-result-card" wx:if="{{result}}">
+    <view class="quick-result-top">
+      <view class="quick-result-copy">
+        <view class="section-mini">先看结论</view>
+        <view class="result-title">{{result.decision.label}}</view>
+        <view class="result-meta-top">{{result.topic.label}} · {{result.originalHexagram.title}}之{{result.changedHexagram.title}}</view>
+      </view>
+      <view class="oracle-seal">断</view>
     </view>
 
     <view class="result-question">{{result.question}}</view>
-    <view class="result-copy">{{result.overview}}</view>
+    <view class="quick-voice">{{result.quickVoice}}</view>
+    <view class="result-copy">{{result.quickLead}}</view>
 
     <view class="decision-row">
-      <view class="tag" wx:for="{{result.plateHighlights}}" wx:key="*this">{{item}}</view>
+      <view class="tag" wx:for="{{result.quickTags}}" wx:key="*this">{{item}}</view>
     </view>
 
-    <view class="oracle-visuals">
-      <view class="visual-panel">
-        <view class="visual-label">本卦</view>
-        <view class="hex-stack">
-          <view
-            wx:for="{{result.visualLines.original}}"
-            wx:key="id"
-            class="hex-line-box {{item.isYang ? 'yang' : 'yin'}} {{item.isMoving ? 'moving' : ''}}"
-          ></view>
-        </view>
-        <view class="visual-title">{{result.originalHexagram.title}}</view>
-      </view>
-
-      <view class="visual-divider">之</view>
-
-      <view class="visual-panel">
-        <view class="visual-label">变卦</view>
-        <view class="hex-stack">
-          <view
-            wx:for="{{result.visualLines.changed}}"
-            wx:key="id"
-            class="hex-line-box {{item.isYang ? 'yang' : 'yin'}} {{item.isMoving ? 'changed' : ''}}"
-          ></view>
-        </view>
-        <view class="visual-title">{{result.changedHexagram.title}}</view>
-      </view>
-    </view>
-  </view>
-
-  <view class="panel-card calendar-card" wx:if="{{result}}">
-    <view class="section-title">起卦信息</view>
-    <view class="calendar-grid">
-      <view class="formal-box calendar-box" wx:for="{{result.calendarPanels}}" wx:key="label">
+    <view class="formal-grid quick-grid">
+      <view class="formal-box" wx:for="{{result.quickPanels}}" wx:key="label">
         <view class="formal-label">{{item.label}}</view>
-        <view class="formal-value">{{item.value}}</view>
+        <view class="formal-value quick-value">{{item.value}}</view>
         <view class="formal-copy">{{item.copy}}</view>
       </view>
     </view>
+
+    <view class="share-actions">
+      <button class="primary-button share-button" bindtap="handleDetailToggle">
+        {{showDetailedResult ? "收起详细排盘" : "展开详细排盘"}}
+      </button>
+      <button class="secondary-button share-button" bindtap="handlePosterOpen" loading="{{isPosterGenerating}}">
+        生成海报
+      </button>
+    </view>
+    <view class="subtle-note detail-note">想继续看世应、用神、纳甲和动爻时，再展开下面这层就够了。</view>
   </view>
 
-  <view class="panel-card formal-card" wx:if="{{result}}">
+  <block wx:if="{{result && showDetailedResult}}">
+    <view class="panel-card detail-bridge">
+      <view class="section-title">详细排盘</view>
+      <view class="section-desc">这里再看世应、用神、纳甲、动爻和应期细断。</view>
+    </view>
+
+    <view class="fortune-card oracle-card">
+      <view class="oracle-top">
+        <view class="oracle-copy">
+          <view class="section-mini">详细排盘</view>
+          <view class="result-title">{{result.originalHexagram.title}}</view>
+          <view class="result-meta-top">
+            {{result.generatedAtLabel}} · {{result.relationProfile.palaceLabel}} {{result.relationProfile.palaceStage}}
+          </view>
+        </view>
+        <view class="oracle-seal">卦</view>
+      </view>
+
+      <view class="result-question">{{result.question}}</view>
+      <view class="result-copy">{{result.overview}}</view>
+
+      <view class="decision-row">
+        <view class="tag" wx:for="{{result.plateHighlights}}" wx:key="*this">{{item}}</view>
+      </view>
+
+      <view class="oracle-visuals">
+        <view class="visual-panel">
+          <view class="visual-label">本卦</view>
+          <view class="hex-stack">
+            <view
+              wx:for="{{result.visualLines.original}}"
+              wx:key="id"
+              class="hex-line-box {{item.isYang ? 'yang' : 'yin'}} {{item.isMoving ? 'moving' : ''}}"
+            ></view>
+          </view>
+          <view class="visual-title">{{result.originalHexagram.title}}</view>
+        </view>
+
+        <view class="visual-divider">之</view>
+
+        <view class="visual-panel">
+          <view class="visual-label">变卦</view>
+          <view class="hex-stack">
+            <view
+              wx:for="{{result.visualLines.changed}}"
+              wx:key="id"
+              class="hex-line-box {{item.isYang ? 'yang' : 'yin'}} {{item.isMoving ? 'changed' : ''}}"
+            ></view>
+          </view>
+          <view class="visual-title">{{result.changedHexagram.title}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="panel-card calendar-card">
+      <view class="section-title">起卦信息</view>
+      <view class="calendar-grid">
+        <view class="formal-box calendar-box" wx:for="{{result.calendarPanels}}" wx:key="label">
+          <view class="formal-label">{{item.label}}</view>
+          <view class="formal-value">{{item.value}}</view>
+          <view class="formal-copy">{{item.copy}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="panel-card formal-card">
     <view class="section-title">排盘重点</view>
     <view class="formal-grid">
       <view class="formal-box">
@@ -139,9 +196,9 @@
         <view class="formal-copy">{{result.decision.desc}}</view>
       </view>
     </view>
-  </view>
+    </view>
 
-  <view class="panel-card relation-card" wx:if="{{result}}">
+    <view class="panel-card relation-card">
     <view class="section-title">世应细断</view>
     <view class="formal-grid">
       <view class="formal-box">
@@ -161,9 +218,9 @@
       </view>
     </view>
     <view class="result-copy">{{result.shiYingProfile.summary}}</view>
-  </view>
+    </view>
 
-  <view class="panel-card pattern-card" wx:if="{{result.patternProfile.primaryLabel}}">
+    <view class="panel-card pattern-card" wx:if="{{result.patternProfile.primaryLabel}}">
     <view class="section-title">反伏与进退</view>
     <view class="formal-box">
       <view class="formal-label">格局</view>
@@ -176,9 +233,9 @@
         <view class="moving-body">{{item.summary}}</view>
       </view>
     </view>
-  </view>
+    </view>
 
-  <view class="panel-card timing-card" wx:if="{{result.timingProfile.items.length}}">
+    <view class="panel-card timing-card" wx:if="{{result.timingProfile.items.length}}">
     <view class="section-title">应期细断</view>
     <view class="formal-box">
       <view class="formal-label">主看</view>
@@ -193,9 +250,9 @@
         <view class="subtle-note" wx:if="{{item.farLabel}}">远应月：{{item.farLabel}}</view>
       </view>
     </view>
-  </view>
+    </view>
 
-  <view class="panel-card timeline-card" wx:if="{{result.timingProfile.timeline.length}}">
+    <view class="panel-card timeline-card" wx:if="{{result.timingProfile.timeline.length}}">
     <view class="section-title">应期时间轴</view>
     <view class="section-desc">先盯最近会应的日点，再看后面会转开的月令。</view>
     <view class="timeline-list">
@@ -214,9 +271,9 @@
         </view>
       </view>
     </view>
-  </view>
+    </view>
 
-  <view class="panel-card yong-card" wx:if="{{result}}">
+    <view class="panel-card yong-card">
     <view class="section-title">用神提要</view>
     <view class="formal-label">{{result.yongShenProfile.label}}</view>
     <view class="formal-value">{{result.yongShenProfile.verdictLabel}}</view>
@@ -235,9 +292,9 @@
         <view class="subtle-note" wx:if="{{item.hostTitle}}">所伏之处：{{item.hostTitle}}</view>
       </view>
     </view>
-  </view>
+    </view>
 
-  <view class="panel-card hidden-card" wx:if="{{result.formalLines.hiddenLines.length}}">
+    <view class="panel-card hidden-card" wx:if="{{result.formalLines.hiddenLines.length}}">
     <view class="section-title">伏神与暗线</view>
     <view class="moving-list">
       <view class="moving-item" wx:for="{{result.formalLines.hiddenLines}}" wx:key="id">
@@ -247,9 +304,9 @@
         <view class="subtle-note" wx:if="{{item.graveVoidLabel}}">墓绝空破：{{item.graveVoidLabel}}</view>
       </view>
     </view>
-  </view>
+    </view>
 
-  <view class="panel-card plate-card" wx:if="{{result}}">
+    <view class="panel-card plate-card">
     <view class="section-title">纳甲六爻盘</view>
     <scroll-view class="plate-scroll" scroll-x>
       <view class="plate-table">
@@ -316,9 +373,9 @@
         </view>
       </view>
     </scroll-view>
-  </view>
+    </view>
 
-  <view class="panel-card moving-card" wx:if="{{result.hasMovingLines}}">
+    <view class="panel-card moving-card" wx:if="{{result.hasMovingLines}}">
     <view class="section-title">动爻提醒</view>
     <view class="moving-list">
       <view class="moving-item" wx:for="{{result.movingLines}}" wx:key="label">
@@ -327,29 +384,23 @@
         <view class="moving-body">{{item.body}}</view>
       </view>
     </view>
-  </view>
+    </view>
 
-  <view class="checklist-grid" wx:if="{{result}}">
+    <view class="checklist-grid">
     <view class="panel-card checklist-card" wx:for="{{result.reportSections}}" wx:key="title">
       <view class="section-title">{{item.title}}</view>
       <view class="result-copy">{{item.body}}</view>
     </view>
-  </view>
+    </view>
 
-  <view class="panel-card advice-card" wx:if="{{result}}">
+    <view class="panel-card advice-card">
     <view class="section-title">这卦给你的行动建议</view>
     <view class="bullet-list">
       <view class="bullet-item" wx:for="{{result.nextActions}}" wx:key="*this">{{item}}</view>
     </view>
     <view class="subtle-note">应期提醒：{{result.timingHint}}</view>
-
-    <view class="share-actions">
-      <button class="primary-button share-button" bindtap="handlePosterOpen" loading="{{isPosterGenerating}}">
-        生成海报
-      </button>
-      <button class="secondary-button share-button" open-type="share">转发好友</button>
     </view>
-  </view>
+  </block>
 
   <view class="panel-card followup-card" wx:if="{{result}}">
     <view class="section-title">结果回访</view>

@@ -1,14 +1,12 @@
 <view class="page-shell draw-page">
   <view class="hero-card draw-hero">
-    <view class="hero-badge">主题抽签</view>
-    <view class="hero-title">先说清楚你在问什么，签才会更像在回应你</view>
-    <view class="hero-copy">
-      这一版把抽签拆成“问什么”和“怎么面对”两层，互动感会比纯随机签更强。
-    </view>
+    <view class="hero-badge">大可不必算 · 抽签</view>
+    <view class="hero-title">先抽一签</view>
+    <view class="hero-copy">不想一上来就看完整排盘时，先来这里听一句提醒。</view>
   </view>
 
   <view class="panel-card ritual-panel">
-    <view class="section-mini">你现在更想问</view>
+    <view class="section-mini">先看你在问什么</view>
     <view class="topic-grid">
       <view
         wx:for="{{drawTopics}}"
@@ -22,7 +20,7 @@
       </view>
     </view>
 
-    <view class="section-mini selector-mini">今天想怎么面对</view>
+    <view class="section-mini selector-mini">再看你想怎么面对</view>
     <view class="mode-grid">
       <view
         wx:for="{{drawModes}}"
@@ -89,25 +87,25 @@
     </view>
 
     <view class="result-section">
-      <view class="section-mini">风向解读</view>
+      <view class="section-mini">先看意思</view>
       <view class="result-copy">{{currentLot.summary}}</view>
       <view class="result-copy">{{currentLot.insight}}</view>
     </view>
 
     <view class="result-section">
-      <view class="section-mini">行动建议</view>
+      <view class="section-mini">你可以先做</view>
       <view class="bullet-list">
         <view class="bullet-item" wx:for="{{currentLot.nextActions}}" wx:key="*this">{{item}}</view>
       </view>
     </view>
 
     <view class="result-section">
-      <view class="section-mini">先避一避</view>
+      <view class="section-mini">今天先避开</view>
       <view class="result-copy">{{currentLot.avoid}}</view>
     </view>
 
     <view class="result-section">
-      <view class="section-mini">仪式提醒</view>
+      <view class="section-mini">再补一句提醒</view>
       <view class="result-copy">{{currentLot.ritual}}</view>
     </view>
 

@@ -7,11 +7,11 @@ Page({
   data: {
     currentLot: null,
     currentPrompt: drawTopics[0].prompt,
-    drawButtonText: "开始抽签",
+    drawButtonText: "抽一签",
     drawModes,
     drawTopics,
     isDrawing: false,
-    motionText: "先定一个念头，再轻触签筒。",
+    motionText: "先把念头放稳，再抽一签。",
     selectedModeId: drawModes[1].id,
     selectedTopicId: drawTopics[0].id,
     supportivePrompt: focusPrompts[0],
@@ -68,7 +68,7 @@ Page({
       currentLot: null,
       drawButtonText: "抽签中",
       isDrawing: true,
-      motionText: "签筒摇动中，请让问题停留在心里。",
+      motionText: "签在路上，先别急着替它下结论。",
     });
 
     this.drawTimer = setTimeout(() => {
@@ -88,9 +88,9 @@ Page({
 
       this.setData({
         currentLot: lot,
-        drawButtonText: "再抽一次",
+        drawButtonText: "再抽一签",
         isDrawing: false,
-        motionText: "签文已现，可以慢慢看。",
+        motionText: "签已经出来了，先看最打动你的那一句。",
       });
     }, 1100);
   },
@@ -104,7 +104,7 @@ Page({
     }
 
     return {
-      title: "来大可不必算抽一支今日签，看看今天的提醒",
+      title: "来大可不必算抽一签，先听一句提醒",
       path: "/pages/draw/draw",
     };
   },

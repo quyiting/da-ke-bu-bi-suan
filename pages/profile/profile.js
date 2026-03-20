@@ -5,8 +5,7 @@ const { buildLocalAccountState } = require("../../utils/cloud");
 const filterOptions = [
   { id: "all", label: "全部" },
   { id: "draw", label: "抽签" },
-  { id: "yao", label: "六爻" },
-  { id: "chart", label: "星盘" },
+  { id: "yao", label: "问事" },
 ];
 const reviewOptions = [
   { id: "pending", label: "待回看" },
@@ -69,6 +68,10 @@ function enhanceAccountState(accountState = {}, history = []) {
   };
 }
 
+function getVisibleHistory(history = getHistory()) {
+  return (Array.isArray(history) ? history : []).filter((item) => item.type !== "chart");
+}
+
 Page({
   data: {
     activeFilter: "all",
@@ -87,7 +90,7 @@ Page({
       lastUpdated: "暂无记录",
       lastSyncedLabel: "尚未同步",
       matchedReviewCount: 0,
-      nextSuggestion: "先从一支主题签开始。",
+      nextSuggestion: "先问一件今天最在意的事。",
       partialReviewCount: 0,
       pendingReviewCount: 0,
       pendingSyncCount: 0,
@@ -108,7 +111,7 @@ Page({
   },
 
   loadHistory() {
-    const history = getHistory();
+    const history = getVisibleHistory();
     const summary = summarizeHistory(history);
 
     this.setData({
@@ -212,7 +215,7 @@ Page({
   },
 
   handleClearLocal() {
-    if (!this.data.history.length) {
+    if (!getHistory().length) {
       wx.showToast({
         title: "本机已经是空的",
         icon: "none",
@@ -229,13 +232,15 @@ Page({
         }
 
         const result = clearLocalHistoryOnly();
+        const visibleHistory = getVisibleHistory(result.history);
+        const visibleSummary = summarizeHistory(visibleHistory);
 
         this.setData({
-          accountState: enhanceAccountState(result.accountState, result.history),
-          history: result.history,
-          summary: result.summary,
+          accountState: enhanceAccountState(result.accountState, visibleHistory),
+          history: visibleHistory,
+          summary: visibleSummary,
         });
-        this.applyFilter(this.data.activeFilter, result.history);
+        this.applyFilter(this.data.activeFilter, visibleHistory);
 
         if (result.accountState.isConfigured) {
           await this.refreshCloudState({
@@ -318,13 +323,13 @@ Page({
       mode: options.mode || "sync",
       reason: options.reason || "profile-open",
     });
-    const nextHistory = result.history || getHistory();
+    const nextHistory = getVisibleHistory(result.history || getHistory());
 
     this.setData({
       accountState: enhanceAccountState(result.accountState || this.data.accountState, nextHistory),
       history: nextHistory,
       isSyncing: false,
-      summary: result.summary || summarizeHistory(nextHistory),
+      summary: summarizeHistory(nextHistory),
     });
     this.applyFilter(this.data.activeFilter, nextHistory);
 

@@ -1,7 +1,6 @@
 .profile-hero,
 .account-card,
 .stats-card,
-.insight-card,
 .revisit-card,
 .history-list-card {
   padding: 38rpx 30rpx;
@@ -9,7 +8,6 @@
 
 .account-card,
 .stats-card,
-.insight-card,
 .revisit-card,
 .history-list-card,
 .entry-card {
@@ -49,11 +47,24 @@
   color: #755844;
 }
 
-.insight-value {
-  margin-top: 16rpx;
-  font-size: 38rpx;
+.record-brief {
+  margin-top: 20rpx;
+  padding: 22rpx 20rpx;
+  border-radius: 22rpx;
+  background: rgba(255, 247, 235, 0.9);
+}
+
+.record-brief-title {
+  font-size: 28rpx;
   font-weight: 700;
   color: #342217;
+}
+
+.record-brief-copy {
+  margin-top: 10rpx;
+  font-size: 23rpx;
+  line-height: 1.65;
+  color: #725744;
 }
 
 .account-top {
@@ -186,6 +197,7 @@
 
 .filter-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 14rpx;
   margin-top: 24rpx;
 }
