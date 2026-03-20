@@ -7,15 +7,15 @@ const TYPE_LABELS = {
 };
 const SYNC_STATUS_META = {
   failed: {
-    label: "同步失败",
+    label: "本地已存",
     tone: "failed",
   },
   local: {
-    label: "待同步",
+    label: "本地已存",
     tone: "local",
   },
   synced: {
-    label: "已同步",
+    label: "本地已存",
     tone: "synced",
   },
 };
@@ -378,7 +378,7 @@ function summarizeHistory(history = getHistory()) {
     favoriteTypeLabel,
     lastUpdated: safeHistory[0] ? safeHistory[0].dateLabel : "暂无记录",
     lastSyncedAt,
-    lastSyncedLabel: lastSyncedAt ? formatRecordTime(lastSyncedAt) : "尚未同步",
+    lastSyncedLabel: lastSyncedAt ? formatRecordTime(lastSyncedAt) : "仅本地存储",
     matchedReviewCount,
     nextSuggestion,
     failedSyncCount,

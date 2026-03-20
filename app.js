@@ -9,20 +9,13 @@ App({
 
   onLaunch() {
     const history = wx.getStorageSync(this.globalData.historyStorageKey);
-    const storedAccountState = wx.getStorageSync(this.globalData.accountStorageKey);
 
     if (!Array.isArray(history)) {
       wx.setStorageSync(this.globalData.historyStorageKey, []);
     }
 
-    if (storedAccountState && typeof storedAccountState === "object") {
-      this.globalData.accountState = {
-        ...this.globalData.accountState,
-        ...storedAccountState,
-      };
-    } else {
-      wx.setStorageSync(this.globalData.accountStorageKey, this.globalData.accountState);
-    }
+    this.globalData.accountState = buildLocalAccountState();
+    wx.setStorageSync(this.globalData.accountStorageKey, this.globalData.accountState);
 
     this.accountPromise = this.ensureAccountState();
   },
@@ -48,12 +41,10 @@ App({
       return this.accountPromise;
     }
 
-    this.accountPromise = bootstrapCloudAccount()
+    this.accountPromise = Promise.resolve(bootstrapCloudAccount())
       .then((accountState) => this.updateAccountState(accountState))
       .catch(() =>
-        this.updateAccountState(
-          buildLocalAccountState("静默识别暂时没有成功，当前先继续保留在本机模式。")
-        )
+        this.updateAccountState(buildLocalAccountState("当前使用本地存储。"))
       );
 
     return this.accountPromise;

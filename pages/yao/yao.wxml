@@ -406,7 +406,7 @@
     <view class="section-title">结果回访</view>
     <view class="followup-head">
       <view class="tag review-tag {{activeReviewTone}}">{{activeReviewLabel}}</view>
-      <view class="subtle-note">这条卦已经同步到“我的记录”，后面可以回来改成已应、部分应或暂未应。</view>
+      <view class="subtle-note">这条卦已经保存到“我的记录”，后面可以回来改成已应、部分应或暂未应。</view>
     </view>
     <view class="review-row">
       <view

@@ -1,67 +1,128 @@
 <view class="page-shell profile-page">
   <view class="hero-card profile-hero">
-    <view class="hero-badge">我的记录</view>
-    <view class="hero-title">最近问过什么，都在这里</view>
-    <view class="hero-copy">先看最近结果和回访，需要时再处理同步就够了。</view>
+    <view class="hero-topline">
+      <view class="hero-badge">本地册页</view>
+      <view class="hero-serial">LOCAL ARCHIVE</view>
+    </view>
+
+    <view class="hero-stage">
+      <view class="hero-main">
+        <view class="hero-title">最近问过什么，</view>
+        <view class="hero-title hero-title-second">都在这里。</view>
+        <view class="hero-copy">
+          所有结果都会直接保存在当前设备的本地存储里。你问过什么、回头看过什么，都像翻册页一样留在这里。
+        </view>
+      </view>
+
+      <view class="hero-aside">
+        <view class="hero-aside-label">卷内记录</view>
+        <view class="hero-aside-value">{{summary.total}}</view>
+        <view class="hero-aside-copy">{{summary.total ? summary.favoriteTypeLabel : "等第一条记录落下"}}</view>
+      </view>
+    </view>
+
+    <view class="hero-strip">
+      <view class="hero-strip-item">
+        <view class="hero-strip-label">今日新增</view>
+        <view class="hero-strip-value">{{summary.todayCount}}</view>
+      </view>
+      <view class="hero-strip-item">
+        <view class="hero-strip-label">探索天数</view>
+        <view class="hero-strip-value">{{summary.exploreDays}}</view>
+      </view>
+      <view class="hero-strip-item">
+        <view class="hero-strip-label">待回看</view>
+        <view class="hero-strip-value">{{summary.pendingReviewCount}}</view>
+      </view>
+    </view>
+
+    <view class="hero-note">
+      <view class="hero-note-title">这页现在更像</view>
+      <view class="hero-note-copy">{{summary.nextSuggestion}}</view>
+    </view>
   </view>
 
   <view class="panel-card stats-card">
-    <view class="stats-grid">
-      <view class="stat-item">
-        <view class="stat-value">{{summary.total}}</view>
-        <view class="stat-label">总记录</view>
+    <view class="section-kicker">Record Portrait</view>
+    <view class="section-title">记录画像</view>
+    <view class="section-desc">把最近的提问习惯、节奏和回头看的状态，整理成一张更好读的页面画像。</view>
+
+    <view class="portrait-grid">
+      <view class="portrait-card portrait-card-feature">
+        <view class="portrait-label">当前画像</view>
+        <view class="portrait-value">{{summary.favoriteTypeLabel}}</view>
+        <view class="portrait-copy">
+          {{summary.total ? "最近的提问路径已经开始有偏向了，翻看记录会更容易看到自己反复在意的东西。" : "先抽一签或问一件事，这里就会开始形成自己的记录画像。"}}
+        </view>
       </view>
-      <view class="stat-item">
-        <view class="stat-value">{{summary.drawCount}}</view>
-        <view class="stat-label">抽签</view>
+
+      <view class="portrait-card">
+        <view class="portrait-label">抽签</view>
+        <view class="portrait-number">{{summary.drawCount}}</view>
+        <view class="portrait-copy">偏提醒、偏感受的入口</view>
       </view>
-      <view class="stat-item">
-        <view class="stat-value">{{summary.yaoCount}}</view>
-        <view class="stat-label">问事</view>
+
+      <view class="portrait-card">
+        <view class="portrait-label">问事</view>
+        <view class="portrait-number">{{summary.yaoCount}}</view>
+        <view class="portrait-copy">偏判断、偏推演的入口</view>
       </view>
-      <view class="stat-item">
-        <view class="stat-value">{{summary.pendingReviewCount}}</view>
-        <view class="stat-label">待回看</view>
+
+      <view class="portrait-card">
+        <view class="portrait-label">探索天数</view>
+        <view class="portrait-number">{{summary.exploreDays}}</view>
+        <view class="portrait-copy">这段时间你回来翻看的频率</view>
+      </view>
+
+      <view class="portrait-card">
+        <view class="portrait-label">最近更新</view>
+        <view class="portrait-number portrait-number-text">{{summary.lastUpdated}}</view>
+        <view class="portrait-copy">以当前设备最近一条历史为准</view>
       </view>
     </view>
+
     <view class="record-brief">
-      <view class="record-brief-title">{{summary.favoriteTypeLabel}}</view>
+      <view class="record-brief-title">接下来最适合做什么</view>
       <view class="record-brief-copy">{{summary.nextSuggestion}}</view>
-    </view>
-    <view class="keyword-row">
-      <view class="tag">今日新增 {{summary.todayCount}}</view>
-      <view class="tag">探索 {{summary.exploreDays}} 天</view>
-      <view class="tag">最近更新 {{summary.lastUpdated}}</view>
     </view>
   </view>
 
   <view class="panel-card revisit-card">
+    <view class="section-kicker">Follow-Up Board</view>
     <view class="section-title">回访状态</view>
-    <view class="stats-grid revisit-grid">
-      <view class="stat-item revisit-item">
-        <view class="stat-value">{{summary.pendingReviewCount}}</view>
-        <view class="stat-label">待回看</view>
+    <view class="section-desc">隔几天回来标一次，比看完就走更容易留下“有没有应”的感觉。</view>
+
+    <view class="revisit-grid">
+      <view class="revisit-item revisit-item-pending">
+        <view class="revisit-item-value">{{summary.pendingReviewCount}}</view>
+        <view class="revisit-item-label">待回看</view>
+        <view class="revisit-item-copy">还在等现实反馈</view>
       </view>
-      <view class="stat-item revisit-item">
-        <view class="stat-value">{{summary.partialReviewCount}}</view>
-        <view class="stat-label">部分应</view>
+      <view class="revisit-item revisit-item-partial">
+        <view class="revisit-item-value">{{summary.partialReviewCount}}</view>
+        <view class="revisit-item-label">部分应</view>
+        <view class="revisit-item-copy">已经开始应，但没全落地</view>
       </view>
-      <view class="stat-item revisit-item">
-        <view class="stat-value">{{summary.matchedReviewCount}}</view>
-        <view class="stat-label">已应</view>
+      <view class="revisit-item revisit-item-matched">
+        <view class="revisit-item-value">{{summary.matchedReviewCount}}</view>
+        <view class="revisit-item-label">已应</view>
+        <view class="revisit-item-copy">结果和现实贴得更近了</view>
       </view>
-      <view class="stat-item revisit-item">
-        <view class="stat-value">{{summary.unmetReviewCount}}</view>
-        <view class="stat-label">暂未应</view>
+      <view class="revisit-item revisit-item-unmet">
+        <view class="revisit-item-value">{{summary.unmetReviewCount}}</view>
+        <view class="revisit-item-label">暂未应</view>
+        <view class="revisit-item-copy">现在看还没走到那一步</view>
       </view>
     </view>
-    <view class="stats-tip">隔几天回来标一次，比看完就走更容易留下“有没有应”的感觉。</view>
   </view>
 
   <view class="history-card history-list-card">
     <view class="history-top">
-      <view class="section-title">最近记录</view>
-      <view class="history-time">本机视图</view>
+      <view class="history-heading">
+        <view class="section-kicker">Recent Entries</view>
+        <view class="section-title">最近记录</view>
+      </view>
+      <view class="history-view-tag">本机视图</view>
     </view>
 
     <view class="filter-row">
@@ -77,57 +138,106 @@
     </view>
 
     <block wx:if="{{filteredHistory.length}}">
-      <view class="history-item" wx:for="{{filteredHistory}}" wx:key="id">
-        <view class="history-item-head">
-          <view class="tag">{{item.typeLabel}}</view>
-          <view class="history-time">{{item.dateLabel}}</view>
-        </view>
-        <view class="history-title">{{item.title}}</view>
-        <view class="history-subtitle" wx:if="{{item.subtitle}}">{{item.subtitle}}</view>
-        <view class="history-subtitle" wx:if="{{item.questionGuideLabel}}">问法：{{item.questionGuideLabel}}</view>
-        <view class="history-question" wx:if="{{item.question}}">问题：{{item.question}}</view>
-        <view class="history-summary">{{item.summary}}</view>
-        <view class="history-badge" wx:if="{{item.badge}}">{{item.badge}}</view>
-        <view class="history-review" wx:if="{{item.type === 'yao'}}">
-          <view class="tag review-tag {{item.reviewTone}}">{{item.reviewLabel}}</view>
-          <view class="history-time" wx:if="{{item.reviewUpdatedLabel}}">回访于 {{item.reviewUpdatedLabel}}</view>
-        </view>
-        <view class="history-timing" wx:if="{{item.timingPreview}}">{{item.timingPreview}}</view>
-        <view class="review-row" wx:if="{{item.type === 'yao'}}">
-          <view
-            wx:for="{{reviewOptions}}"
-            wx:key="id"
-            wx:for-item="option"
-            class="review-chip {{item.reviewStatus === option.id ? 'active' : ''}}"
-            data-id="{{item.id}}"
-            data-status="{{option.id}}"
-            bindtap="handleReviewStatus"
-          >
-            {{option.label}}
+      <view class="history-stack">
+        <view class="history-item" wx:for="{{filteredHistory}}" wx:key="id" wx:for-index="entryIndex">
+          <view class="history-item-index">{{entryIndex + 1}}</view>
+
+          <view class="history-card-shell">
+            <view class="history-item-head">
+              <view class="history-head-left">
+                <view class="tag history-type-tag">{{item.typeLabel}}</view>
+                <view class="history-time">{{item.dateLabel}}</view>
+              </view>
+              <view class="history-status-tag" wx:if="{{item.type === 'yao'}}">{{item.reviewLabel}}</view>
+              <view class="history-status-tag history-status-tag-neutral" wx:else>已收录</view>
+            </view>
+
+            <view class="history-title">{{item.title}}</view>
+
+            <view class="history-subtitle-row" wx:if="{{item.subtitle || item.questionGuideLabel}}">
+              <view class="history-subtitle" wx:if="{{item.subtitle}}">{{item.subtitle}}</view>
+              <view class="history-subtitle history-subtitle-guide" wx:if="{{item.questionGuideLabel}}">
+                问法 · {{item.questionGuideLabel}}
+              </view>
+            </view>
+
+            <view class="history-question-box" wx:if="{{item.question}}">
+              <view class="history-question-label">当时在问</view>
+              <view class="history-question">{{item.question}}</view>
+            </view>
+
+            <view class="history-summary-box">
+              <view class="history-summary">{{item.summary}}</view>
+            </view>
+
+            <view class="history-foot" wx:if="{{item.badge || item.timingPreview}}">
+              <view class="history-badge" wx:if="{{item.badge}}">{{item.badge}}</view>
+              <view class="history-timing" wx:if="{{item.timingPreview}}">{{item.timingPreview}}</view>
+            </view>
+
+            <block wx:if="{{item.type === 'yao'}}">
+              <view class="history-review-note" wx:if="{{item.reviewUpdatedLabel}}">
+                最近回访于 {{item.reviewUpdatedLabel}}
+              </view>
+
+              <view class="review-row">
+                <view
+                  wx:for="{{reviewOptions}}"
+                  wx:key="id"
+                  wx:for-item="option"
+                  class="review-chip {{item.reviewStatus === option.id ? 'active' : ''}}"
+                  data-id="{{item.id}}"
+                  data-status="{{option.id}}"
+                  bindtap="handleReviewStatus"
+                >
+                  {{option.label}}
+                </view>
+              </view>
+            </block>
           </view>
         </view>
       </view>
     </block>
 
     <block wx:else>
-      <view class="empty-state">这个筛选条件下还没有记录，换一个筛选，或者先去抽一签、问一件事。</view>
+      <view class="empty-state empty-state-rich">
+        这个筛选条件下还没有记录。先去抽一签、问一件事，或者换一个筛选看看。
+      </view>
     </block>
   </view>
 
   <view class="panel-card entry-card">
-    <navigator class="primary-button entry-button" url="/pages/yao/yao" open-type="switchTab">继续问事</navigator>
-    <navigator class="secondary-button entry-button" url="/pages/draw/draw" open-type="navigate">抽一签</navigator>
+    <view class="section-kicker">Next Move</view>
+    <view class="section-title">继续留下新的线索</view>
+    <view class="section-desc">想补一条新记录时，从这里回到最顺手的入口。</view>
+
+    <view class="entry-grid">
+      <navigator class="entry-tile entry-tile-primary" url="/pages/yao/yao" open-type="switchTab">
+        <view class="entry-tile-mini">更适合判断</view>
+        <view class="entry-tile-title">继续问事</view>
+        <view class="entry-tile-copy">把眼前最在意的一件事再收成一句话，继续起一卦。</view>
+      </navigator>
+
+      <navigator class="entry-tile entry-tile-secondary" url="/pages/draw/draw" open-type="navigate">
+        <view class="entry-tile-mini">更适合提醒</view>
+        <view class="entry-tile-title">抽一签</view>
+        <view class="entry-tile-copy">先听一句提醒，再决定你接下来要不要继续追问。</view>
+      </navigator>
+    </view>
   </view>
 
   <view class="panel-card account-card">
     <view class="account-top">
       <view class="account-copy-wrap">
-        <view class="section-title">同步与备份</view>
+        <view class="section-kicker">Local Archive</view>
+        <view class="section-title">本地存储</view>
         <view class="account-value">{{accountState.modeLabel}}</view>
         <view class="account-copy">{{accountState.statusCopy}}</view>
       </view>
       <view class="tag account-status {{accountState.tone}}">{{accountState.statusTag}}</view>
     </view>
+
+    <view class="account-ribbon">当前版本只在本机留档，不做云端迁移。</view>
 
     <view class="account-grid">
       <view class="account-item">
@@ -136,62 +246,41 @@
         <view class="account-item-copy">当前这台设备正在展示的历史数量</view>
       </view>
       <view class="account-item">
-        <view class="account-item-label">云端记录</view>
-        <view class="account-item-value">{{accountState.cloudHistoryCount}} 条</view>
-        <view class="account-item-copy">这个微信账号目前保存在云端的数量</view>
+        <view class="account-item-label">存储方式</view>
+        <view class="account-item-value">微信本地存储</view>
+        <view class="account-item-copy">{{accountState.storageCopy}}</view>
       </view>
       <view class="account-item">
-        <view class="account-item-label">识别状态</view>
+        <view class="account-item-label">数据范围</view>
         <view class="account-item-value">{{accountState.userLabel}}</view>
-        <view class="account-item-copy">{{accountState.recognitionCopy}}</view>
+        <view class="account-item-copy">{{accountState.deviceCopy}}</view>
       </view>
       <view class="account-item">
-        <view class="account-item-label">云环境</view>
-        <view class="account-item-value">{{accountState.cloudEnvLabel}}</view>
-        <view class="account-item-copy">{{accountState.cloudCopy}}</view>
+        <view class="account-item-label">最近更新</view>
+        <view class="account-item-value">{{summary.lastUpdated}}</view>
+        <view class="account-item-copy">以当前设备最近一条历史记录为准</view>
       </view>
       <view class="account-item account-item-wide">
-        <view class="account-item-label">最近同步</view>
-        <view class="account-item-value">{{accountState.lastSyncedLabel}}</view>
-        <view class="account-item-copy">已同步 {{summary.syncedCount}} 条，待同步 {{summary.pendingSyncCount}} 条</view>
+        <view class="account-item-label">使用提醒</view>
+        <view class="account-item-value">{{history.length ? "换设备不会自动迁移" : "本机还没有记录"}}</view>
+        <view class="account-item-copy">清理小程序数据后，本地历史不会自动恢复。</view>
       </view>
     </view>
 
-    <view class="keyword-row">
-      <view class="tag">同步失败 {{summary.failedSyncCount}}</view>
-      <view class="tag">待回看 {{summary.pendingReviewCount}}</view>
-      <view class="tag">已应 {{summary.matchedReviewCount}}</view>
-      <view class="tag" wx:if="{{accountState.autoPullBlocked}}">手动拉回模式</view>
-      <view class="tag" wx:if="{{accountState.autoPushBlocked}}">手动恢复备份</view>
+    <view class="account-note-row">
+      <view class="account-note">换设备不会自动带走这些记录</view>
+      <view class="account-note">删除本地数据后无法自动找回</view>
     </view>
 
     <view class="account-action-row">
-      <button class="primary-button action-button" bindtap="handleManualSync" loading="{{isSyncing}}" disabled="{{isSyncing}}">
-        {{isSyncing ? "处理中" : accountState.actionLabel}}
-      </button>
-      <button class="secondary-button action-button" bindtap="handlePullFromCloud" disabled="{{isSyncing}}">
-        从云端拉回
-      </button>
-    </view>
-    <view class="account-action-row secondary-row">
-      <button class="secondary-button action-button" bindtap="handleClearLocal" disabled="{{isSyncing}}">
-        清空本机
-      </button>
-      <button class="secondary-button action-button danger-button" bindtap="handleClearCloud" disabled="{{isSyncing}}">
-        清空云端
+      <button class="secondary-button action-button danger-button" bindtap="handleClearLocal">
+        清空本机记录
       </button>
     </view>
 
     <view class="account-guide" wx:if="{{accountState.guideTitle}}">
       <view class="account-guide-title">{{accountState.guideTitle}}</view>
       <view class="account-guide-copy">{{accountState.guideCopy}}</view>
-    </view>
-
-    <view class="subtle-note" wx:if="{{accountState.autoPullBlocked}}">
-      你刚刚清空过本机记录，所以云端历史不会自动回来。只有主动点“从云端拉回”，才会把云端内容重新接回这台设备。
-    </view>
-    <view class="subtle-note" wx:if="{{accountState.autoPushBlocked}}">
-      你刚刚清空过云端记录，所以系统不会自动把本机内容重新上传。只有主动点“恢复云端备份”，才会重新开始云端备份。
     </view>
   </view>
 </view>
