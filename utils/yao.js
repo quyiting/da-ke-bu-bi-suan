@@ -1781,6 +1781,7 @@ function buildSixYaoReading(topicId, question = "") {
   return {
     calendar: calendarContext,
     calendarPanels: buildCalendarPanels(calendarContext, relationProfile),
+    castLines: lines,
     changedHexagram,
     decision,
     formalLines,

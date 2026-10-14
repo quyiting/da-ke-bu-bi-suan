@@ -74,6 +74,60 @@
   font-size: 22rpx;
 }
 
+.home-entry-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 24rpx;
+}
+
+.daily-card {
+  margin-top: 24rpx;
+  padding: 28rpx 24rpx;
+  border: 1rpx solid rgba(168, 79, 44, 0.18);
+  border-radius: 24rpx;
+  background: #fffaf3;
+}
+
+.daily-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.daily-date {
+  color: #795a43;
+  font-size: 22rpx;
+}
+
+.daily-title {
+  margin-top: 18rpx;
+  color: #372317;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.daily-copy {
+  margin-top: 12rpx;
+  color: #654a38;
+  font-size: 26rpx;
+  line-height: 1.8;
+}
+
+.daily-action {
+  margin-top: 24rpx;
+}
+
+.home-entry-actions button {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.shortcut-heading {
+  margin-top: 28rpx;
+}
+
 .starter-panel {
   margin-top: 24rpx;
   padding: 24rpx 22rpx;

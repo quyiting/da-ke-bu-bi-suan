@@ -1,0 +1,17 @@
+<view class="poster-mask" wx:if="{{posterVisible}}" bindtap="handlePosterClose">
+  <view class="poster-sheet" catchtap="noop">
+    <view class="section-title">分享海报</view>
+    <view class="subtle-note">保存或长按海报即可分享当时的结果。</view>
+    <image wx:if="{{posterImage}}" class="poster-image" src="{{posterImage}}" mode="widthFix" show-menu-by-longpress="true"></image>
+    <view wx:elif="{{isPosterGenerating}}" class="poster-loading">正在绘制分享海报...</view>
+    <view wx:else class="poster-loading">
+      海报暂未生成，请重试。
+      <button class="secondary-button record-new-button" bindtap="handlePosterOpen">重新生成</button>
+    </view>
+    <view class="poster-actions">
+      <button class="primary-button poster-action" bindtap="savePoster" disabled="{{!posterImage}}">保存海报</button>
+      <button class="secondary-button poster-action" bindtap="handlePosterClose">关闭</button>
+    </view>
+  </view>
+</view>
+<canvas canvas-id="posterCanvas" class="poster-canvas"></canvas>

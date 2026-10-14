@@ -77,6 +77,17 @@ function drawLot(topicId = "love", modeId = "observe", date = new Date()) {
   const mode = drawModes.find((item) => item.id === modeId) || drawModes[0];
   const randomKey = `${getDateKey(date)}-${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}-${Math.floor(Math.random() * 1000)}`;
   const seed = hashString(`lot-${topic.id}-${mode.id}-${randomKey}`);
+  return buildLot(topic, mode, seed);
+}
+
+function drawDailyLot(date = new Date()) {
+  const dailyDate = getDateKey(date);
+  const topic = drawTopics.find((item) => item.id === "self");
+  const mode = drawModes.find((item) => item.id === "observe");
+  return { ...buildLot(topic, mode, hashString(`daily-${dailyDate}`)), dailyDate };
+}
+
+function buildLot(topic, mode, seed) {
   const selectedLot = pick(lotPool, seed);
   const actionHints = pickUnique(topic.actions, seed, 2, 7);
   const resultTags = Array.from(new Set(selectedLot.keywords.concat(topic.keywords))).slice(0, 4);
@@ -114,5 +125,7 @@ function drawLot(topicId = "love", modeId = "observe", date = new Date()) {
 
 module.exports = {
   createHomeHighlight,
+  drawDailyLot,
   drawLot,
+  getDateKey,
 };

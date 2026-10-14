@@ -1,6 +1,8 @@
 const { yaoTopics } = require("../../utils/yao-data");
-const { createHomeHighlight } = require("../../utils/fortune");
+const { createHomeHighlight, getDateKey } = require("../../utils/fortune");
+const { getDailyLot } = require("../../utils/daily-lot");
 const { getHistory, summarizeHistory } = require("../../utils/history");
+const { openRecord } = require("../../utils/record-navigation");
 
 const PENDING_YAO_INTENT_KEY = "fortune-pending-yao-intent";
 const shortcutConfigs = [
@@ -34,14 +36,6 @@ const shortcutConfigs = [
   },
 ];
 const utilityCards = [
-  {
-    action: "轻一点进入",
-    copy: "想先听一句提醒，可以从这里开始。",
-    mode: "navigate",
-    tag: "轻一点",
-    title: "抽一签",
-    url: "/pages/draw/draw",
-  },
   {
     action: "回看最近结果",
     copy: "把问过的事和后来有没有应，都留在这里。",
@@ -91,16 +85,16 @@ function buildShortcutPresets() {
 function buildSummaryCards(summary) {
   return [
     {
-      label: "已问过",
+      label: "已抽签",
+      value: `${summary.drawCount}`,
+    },
+    {
+      label: "已问事",
       value: `${summary.yaoCount}`,
     },
     {
-      label: "等回看",
+      label: "待回看",
       value: `${summary.pendingReviewCount}`,
-    },
-    {
-      label: "已应",
-      value: `${summary.matchedReviewCount}`,
     },
   ];
 }
@@ -134,7 +128,8 @@ function buildRecentCard(history = [], summary = {}) {
 
   if (recentEntry.type === "yao") {
     return {
-      actionLabel: summary.pendingReviewCount ? "去我的记录回看" : "去我的记录",
+      actionLabel: recentEntry.result ? "回看这次问事" : "去记录看摘要",
+      recordId: recentEntry.result ? recentEntry.id : "",
       body: recentEntry.summary,
       eyebrow: summary.pendingReviewCount ? "先回看，再继续问" : "最近问到这里",
       mode: "switchTab",
@@ -148,13 +143,14 @@ function buildRecentCard(history = [], summary = {}) {
 
   if (recentEntry.type === "draw") {
     return {
-      actionLabel: "再抽一签",
+      actionLabel: recentEntry.result ? "回看这支签" : "去记录看摘要",
+      recordId: recentEntry.result ? recentEntry.id : "",
       body: recentEntry.summary,
       eyebrow: "最近抽到这支签",
-      mode: "navigate",
+      mode: "switchTab",
       tags: [recentEntry.typeLabel].concat(recentEntry.badge ? [recentEntry.badge] : []),
       title: recentEntry.title,
-      url: "/pages/draw/draw",
+      url: "/pages/profile/profile",
     };
   }
 
@@ -201,6 +197,7 @@ function openPage(url, mode = "switchTab") {
 Page({
   data: {
     activeShortcut: {},
+    dailyCard: {},
     recentCard: null,
     selectedShortcutId: shortcutConfigs[0].id,
     shortcutPresets: buildShortcutPresets(),
@@ -213,11 +210,18 @@ Page({
     const history = getVisibleHistory();
     const summary = summarizeHistory(history);
     const todayHighlight = createHomeHighlight();
+    const daily = getDailyLot();
     const shortcutPresets = buildShortcutPresets();
     const activeShortcut = getActiveShortcut(shortcutPresets, this.data.selectedShortcutId);
 
     this.setData({
       activeShortcut,
+      dailyCard: {
+        date: getDateKey(),
+        title: daily ? daily.result.title : "给今天留一句提醒",
+        copy: daily ? daily.result.poem : "先安顿自己，再出发。同一天打开，还是同一支签。",
+        action: daily ? "回看今日一签" : "揭开今日一签",
+      },
       recentCard: buildRecentCard(history, summary),
       shortcutPresets,
       summaryCards: buildSummaryCards(summary),
@@ -236,6 +240,7 @@ Page({
   },
 
   handleStartYao() {
+    wx.removeStorageSync("fortune-pending-record-id");
     const activeShortcut = getActiveShortcut(this.data.shortcutPresets, this.data.selectedShortcutId);
 
     if (activeShortcut.topicId) {
@@ -257,10 +262,19 @@ Page({
     });
   },
 
+  handleOpenDaily() {
+    wx.navigateTo({ url: "/pages/draw/draw?daily=1" });
+  },
+
   handleOpenRecent() {
     const { recentCard } = this.data;
 
     if (!recentCard) {
+      return;
+    }
+
+    if (recentCard.recordId) {
+      openRecord(recentCard.recordId);
       return;
     }
 

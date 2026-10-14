@@ -1,11 +1,12 @@
 <view class="page-shell draw-page">
   <view class="hero-card draw-hero">
-    <view class="hero-badge">大可不必算 · 抽签</view>
-    <view class="hero-title">先抽一签</view>
-    <view class="hero-copy">不想一上来就看完整排盘时，先来这里听一句提醒。</view>
+    <view class="hero-badge">大可不必算 · {{isDaily ? '今日一签' : '抽签'}}</view>
+    <view class="hero-title">{{isDaily ? '今天，慢慢来' : '先抽一签'}}</view>
+    <view class="hero-copy">{{isDaily ? '一天一签，给今天留一句提醒。同一天回来，还是同一支签。' : '不想一上来就看完整排盘时，先来这里听一句提醒。'}}</view>
+    <view class="daily-date" wx:if="{{isDaily}}">{{dailyDate}}</view>
   </view>
 
-  <view class="panel-card ritual-panel">
+  <view class="panel-card ritual-panel" wx:if="{{!isViewingRecord && !isDaily && !currentLot}}">
     <view class="section-mini">先看你在问什么</view>
     <view class="topic-grid">
       <view
@@ -38,10 +39,10 @@
     <view class="subtle-note">{{supportivePrompt}}</view>
   </view>
 
-  <view class="lot-stage">
+  <view class="lot-stage" wx:if="{{!isViewingRecord && !currentLot}}">
     <view class="lot-vessel {{isDrawing ? 'is-drawing' : ''}}">
       <view class="lot-ring"></view>
-      <view class="lot-title">玄趣签筒</view>
+      <view class="lot-title">{{isDaily ? '今日一签' : '玄趣签筒'}}</view>
       <view class="lot-caption">{{motionText}}</view>
     </view>
 
@@ -56,6 +57,8 @@
   </view>
 
   <view class="fortune-card result-card" wx:if="{{currentLot}}">
+    <view class="subtle-note">{{recordSaved ? (isViewingRecord ? "正在回看当时保存的签文" : "完整签文已保存在本机记录") : (isDaily ? "今日签文未在记录中，可用海报留存" : "本机保存失败，请先保存海报留存")}}</view>
+    <view class="daily-result-date" wx:if="{{currentLot.dailyDate}}">今日一签 · {{currentLot.dailyDate}}</view>
     <view class="result-head">
       <view>
         <view class="lot-level">{{currentLot.level}}</view>
@@ -74,6 +77,30 @@
       <view class="poem-text">{{currentLot.poem}}</view>
     </view>
 
+    <view class="result-section insight-card">
+      <view class="section-mini">一句提醒</view>
+      <view class="insight-text">{{currentLot.insight}}</view>
+    </view>
+
+    <view class="result-section">
+      <view class="section-mini">你可以先做</view>
+      <view class="action-list">
+        <view class="action-item" wx:for="{{currentLot.nextActions}}" wx:key="*this">
+          <view class="action-number">{{index + 1}}</view>
+          <view class="action-copy">{{item}}</view>
+        </view>
+      </view>
+    </view>
+
+    <button class="secondary-button draw-button" bindtap="handleDetailToggle">{{showDetailedResult ? "收起更多解读" : "展开更多解读"}}</button>
+
+    <block wx:if="{{showDetailedResult}}">
+
+    <view class="result-section">
+      <view class="section-mini">再读签意</view>
+      <view class="result-copy">{{currentLot.summary}}</view>
+    </view>
+
     <view class="meter-list">
       <view class="meter-item" wx:for="{{currentLot.meters}}" wx:key="label">
         <view class="meter-top">
@@ -83,19 +110,6 @@
         <view class="score-bar">
           <view class="score-fill" style="width: {{item.score}}%;"></view>
         </view>
-      </view>
-    </view>
-
-    <view class="result-section">
-      <view class="section-mini">先看意思</view>
-      <view class="result-copy">{{currentLot.summary}}</view>
-      <view class="result-copy">{{currentLot.insight}}</view>
-    </view>
-
-    <view class="result-section">
-      <view class="section-mini">你可以先做</view>
-      <view class="bullet-list">
-        <view class="bullet-item" wx:for="{{currentLot.nextActions}}" wx:key="*this">{{item}}</view>
       </view>
     </view>
 
@@ -118,5 +132,15 @@
     </view>
 
     <view class="blessing-text">{{currentLot.blessing}}</view>
+    </block>
+
+    <view class="poster-actions">
+      <button class="primary-button poster-action" bindtap="handlePosterOpen" loading="{{isPosterGenerating}}">生成海报</button>
+      <button class="secondary-button poster-action" open-type="share">邀请朋友体验</button>
+    </view>
+
+    <button class="secondary-button draw-button" bindtap="handleNewDraw">{{isDaily ? "再问一支主题签" : "开始新的抽签"}}</button>
+    <view class="subtle-note">内容仅供娱乐与自我探索参考。</view>
   </view>
 </view>
+<include src="../../templates/poster.wxml" />

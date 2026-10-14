@@ -1,7 +1,12 @@
 const { yaoTopics } = require("../../utils/yao-data");
 const { buildSixYaoReading } = require("../../utils/yao");
-const { addHistory, createHistoryEntry, getReviewMeta, updateHistoryEntry } = require("../../utils/history");
+const { addHistory, createHistoryEntry, getHistoryEntry, getReviewMeta, saveReviewNote, updateHistoryEntry } = require("../../utils/history");
 const { requestHistorySync } = require("../../utils/history-sync");
+const { PENDING_RECORD_KEY } = require("../../utils/record-navigation");
+const { confirmHistoryCapacity } = require("../../utils/history-capacity");
+const { getHexagramKnowledge } = require("../../utils/hexagram-knowledge");
+
+const { fillParagraph } = require("../../utils/poster-text");
 
 const POSTER_WIDTH = 620;
 const POSTER_HEIGHT = 1080;
@@ -12,49 +17,6 @@ const reviewOptions = [
   { id: "matched", label: "已应" },
   { id: "unmet", label: "暂未应" },
 ];
-
-function splitText(text, maxChars = 18, maxLines = 3) {
-  const safeText = `${text || ""}`.trim();
-
-  if (!safeText) {
-    return [];
-  }
-
-  const result = [];
-  let currentLine = "";
-
-  for (let index = 0; index < safeText.length; index += 1) {
-    const char = safeText[index];
-
-    if (char === "\n") {
-      if (currentLine) {
-        result.push(currentLine);
-        currentLine = "";
-      }
-    } else {
-      currentLine += char;
-    }
-
-    if (currentLine.length >= maxChars) {
-      result.push(currentLine);
-      currentLine = "";
-    }
-
-    if (result.length >= maxLines) {
-      break;
-    }
-  }
-
-  if (currentLine && result.length < maxLines) {
-    result.push(currentLine);
-  }
-
-  if (result.length === maxLines && safeText.length > result.join("").length) {
-    result[maxLines - 1] = `${result[maxLines - 1].slice(0, Math.max(maxChars - 1, 1))}…`;
-  }
-
-  return result;
-}
 
 function drawRoundRect(ctx, x, y, width, height, radius, fillColor, strokeColor, lineWidth = 1) {
   const safeRadius = Math.min(radius, width / 2, height / 2);
@@ -108,25 +70,6 @@ function drawHexagram(ctx, lines, x, y, width, lineHeight, gapY, useChanged = fa
   });
 }
 
-function fillParagraph(ctx, text, x, y, options = {}) {
-  const {
-    color = "#503528",
-    fontSize = 24,
-    lineHeight = 34,
-    maxChars = 18,
-    maxLines = 3,
-  } = options;
-  const lines = splitText(text, maxChars, maxLines);
-
-  ctx.setFillStyle(color);
-  ctx.setFontSize(fontSize);
-  lines.forEach((line, index) => {
-    ctx.fillText(line, x, y + index * lineHeight);
-  });
-
-  return y + lines.length * lineHeight;
-}
-
 function drawTagRow(ctx, tags, x, y) {
   let cursorX = x;
 
@@ -164,11 +107,13 @@ function buildTimingPreview(timingProfile) {
   return `${primaryPoint.scopeLabel}先看 ${primaryPoint.label}${primaryPoint.note ? `（${primaryPoint.note}）` : ""}`;
 }
 
-function buildReviewState(status = "pending") {
+function buildReviewState(status = "pending", note = "", updatedLabel = "") {
   const meta = getReviewMeta(status);
 
   return {
     activeReviewLabel: meta.label,
+    activeReviewNote: note,
+    activeReviewUpdatedLabel: updatedLabel,
     activeReviewStatus: status,
     activeReviewTone: meta.tone,
   };
@@ -331,6 +276,7 @@ function consumePendingIntent(page) {
   }
 
   wx.removeStorageSync(PENDING_YAO_INTENT_KEY);
+  page.clearCast();
   const topic = getTopicById(pendingIntent.topicId);
   const guides = topic.questionGuides || [];
   const guide = pendingIntent.guideId
@@ -339,6 +285,12 @@ function consumePendingIntent(page) {
 
   page.setData({
     activeRecordId: "",
+    editingReviewId: "",
+    reviewNoteDraft: "",
+    isViewingRecord: false,
+    recordSaved: false,
+    isCasting: false,
+    isPosterGenerating: false,
     ...buildReviewState("pending"),
     castingText: guide ? `已替你把问题收束到“${guide.label}”，这卦会更好读。` : topic.settleHint,
     drawButtonText: "立即起卦",
@@ -347,6 +299,8 @@ function consumePendingIntent(page) {
     questionGuides: guides,
     questionInput: pendingIntent.questionInput || (guide ? guide.template : topic.prompt),
     result: null,
+    hexagramKnowledge: null,
+    showHexagramKnowledge: false,
     selectedGuideId: guide ? guide.id : "",
     selectedTopicId: topic.id,
     showDetailedResult: false,
@@ -359,9 +313,18 @@ Page({
     activeReviewLabel: buildReviewState().activeReviewLabel,
     activeReviewStatus: buildReviewState().activeReviewStatus,
     activeReviewTone: buildReviewState().activeReviewTone,
+    activeReviewNote: "",
+    activeReviewUpdatedLabel: "",
+    editingReviewId: "",
+    reviewNoteDraft: "",
     castingText: "先把问题收成一句话，再起一卦。",
+    castProgress: 0,
+    castCoins: [],
+    castingRows: [],
     drawButtonText: "立即起卦",
     isCasting: false,
+    isViewingRecord: false,
+    recordSaved: false,
     isPosterGenerating: false,
     posterImage: "",
     posterVisible: false,
@@ -369,6 +332,8 @@ Page({
     questionGuides: getQuestionGuides(yaoTopics[0].id),
     reviewOptions,
     result: null,
+    hexagramKnowledge: null,
+    showHexagramKnowledge: false,
     selectedGuideId: "",
     selectedTopicId: yaoTopics[0].id,
     showDetailedResult: false,
@@ -376,14 +341,55 @@ Page({
   },
 
   onShow() {
+    const recordId = wx.getStorageSync(PENDING_RECORD_KEY);
+
+    if (recordId) {
+      wx.removeStorageSync(PENDING_RECORD_KEY);
+      const entry = getHistoryEntry(recordId);
+
+      if (entry && entry.type === "yao" && entry.result) {
+        this.clearCast();
+        this.setData({
+          activeRecordId: entry.id,
+          editingReviewId: "",
+          reviewNoteDraft: "",
+          ...buildReviewState(entry.reviewStatus, entry.reviewNote, entry.reviewUpdatedLabel),
+          castingText: `正在回看 ${entry.dateLabel} 的卦盘。`,
+          isCasting: false,
+          isViewingRecord: true,
+          recordSaved: true,
+          isPosterGenerating: false,
+          posterImage: "",
+          posterVisible: false,
+          questionInput: entry.result.question,
+          questionGuides: getQuestionGuides(entry.result.topic.id),
+          selectedGuideId: "",
+          selectedTopicId: entry.result.topic.id,
+          showDetailedResult: false,
+          result: entry.result,
+          hexagramKnowledge: getHexagramKnowledge(entry.result.originalHexagram.id),
+          showHexagramKnowledge: false,
+        });
+      } else {
+        wx.showToast({ title: "这条记录没有完整卦盘", icon: "none" });
+      }
+      return;
+    }
+
     consumePendingIntent(this);
+    const activeEntry = getHistoryEntry(this.data.activeRecordId);
+    if (activeEntry) {
+      this.setData(buildReviewState(activeEntry.reviewStatus, activeEntry.reviewNote, activeEntry.reviewUpdatedLabel));
+    } else if (this.data.activeRecordId) {
+      this.setData({ activeRecordId: "", recordSaved: false, editingReviewId: "", reviewNoteDraft: "" });
+    }
   },
 
   selectTopic(event) {
     const { topicId } = event.currentTarget.dataset;
     const nextTopic = getTopicById(topicId);
 
-    if (!topicId || topicId === this.data.selectedTopicId) {
+    if (this.data.isCasting || !topicId || topicId === this.data.selectedTopicId) {
       return;
     }
 
@@ -400,7 +406,7 @@ Page({
     const { guideId } = event.currentTarget.dataset;
     const guide = getGuideById(this.data.selectedTopicId, guideId);
 
-    if (!guide) {
+    if (this.data.isCasting || !guide) {
       return;
     }
 
@@ -417,7 +423,36 @@ Page({
     });
   },
 
+  handleNewQuestion() {
+    this.clearCast();
+    this.setData({
+      isCasting: false,
+      activeRecordId: "",
+      editingReviewId: "",
+      reviewNoteDraft: "",
+      ...buildReviewState("pending"),
+      isViewingRecord: false,
+      recordSaved: false,
+      result: null,
+      hexagramKnowledge: null,
+      showHexagramKnowledge: false,
+      showDetailedResult: false,
+      isPosterGenerating: false,
+      questionInput: "",
+      selectedGuideId: "",
+      drawButtonText: "立即起卦",
+      castingText: "先把问题收成一句话，再起一卦。",
+      posterImage: "",
+      posterVisible: false,
+    });
+  },
+
   handleCast() {
+    if (this.data.isCasting) return;
+    confirmHistoryCapacity(this, () => this.startCast());
+  },
+
+  startCast() {
     if (this.data.isCasting) {
       return;
     }
@@ -425,48 +460,97 @@ Page({
     const selectedTopic = getTopicById(this.data.selectedTopicId);
     const selectedGuide = getGuideById(this.data.selectedTopicId, this.data.selectedGuideId);
     const questionText = this.data.questionInput.trim() || (selectedGuide ? selectedGuide.template : selectedTopic.prompt);
+    const result = buildDisplayResult(buildSixYaoReading(selectedTopic.id, questionText));
+    const pending = { result, guideLabel: selectedGuide ? selectedGuide.label : "" };
+    this.pendingCast = pending;
 
     this.setData({
       activeRecordId: "",
+      editingReviewId: "",
+      reviewNoteDraft: "",
+      recordSaved: false,
       ...buildReviewState("pending"),
       castingText: "卦在路上，先别急着替它下结论。",
+      castProgress: 0,
+      castCoins: [],
+      castingRows: result.castLines.slice().reverse().map((line) => ({ position: line.position, positionLabel: line.positionLabel, revealed: false })),
       drawButtonText: "起卦中",
       isCasting: true,
       isPosterGenerating: false,
       posterImage: "",
       posterVisible: false,
       result: null,
+      hexagramKnowledge: null,
+      showHexagramKnowledge: false,
       showDetailedResult: false,
     });
 
-    this.castTimer = setTimeout(() => {
-      const result = buildDisplayResult(buildSixYaoReading(this.data.selectedTopicId, questionText));
-      const historyEntry = createHistoryEntry("yao", {
-        badge: `${result.changedHexagram.title} · ${result.decision.label}`,
-        question: result.question,
-        questionGuideLabel: selectedGuide ? selectedGuide.label : "",
-        reviewStatus: "pending",
-        subtitle: `${selectedGuide ? `${selectedGuide.label} · ` : ""}${result.calendar.monthPillar}月 ${result.calendar.dayPillar}日 · ${result.relationProfile.shiLabel}世 ${result.relationProfile.yingLabel}应`,
-        summary: result.yongShenProfile.verdictBody,
-        timingPreview: buildTimingPreview(result.timingProfile),
-        title: `${result.topic.label} · ${result.originalHexagram.title}`,
-        topicLabel: result.topic.label,
-      });
-
-      addHistory(historyEntry);
-      requestHistorySync({
-        reason: "yao-created",
-      });
-
+    this.castTimers = result.castLines.map((line, index) => setTimeout(() => {
+      if (this.pendingCast !== pending) return;
       this.setData({
-        activeRecordId: historyEntry.id,
-        castingText: "先看一句结果。要不要展开详细盘，等你自己决定。",
-        drawButtonText: "再问一件事",
-        isCasting: false,
-        questionInput: result.question,
-        result,
+        castProgress: index + 1,
+        castCoins: line.coins.map((value, id) => ({ id, value, label: value === 2 ? "正" : "背" })),
+        castingRows: this.data.castingRows.map((row) => row.position === line.position ? { ...line, revealed: true } : row),
+        castingText: `第 ${index + 1} 次 · ${line.positionLabel} · ${line.typeLabel}${line.isMoving ? "（动爻）" : ""}`,
       });
-    }, 1200);
+    }, (index + 1) * 250));
+    this.castTimers.push(setTimeout(() => this.finishCast(pending), 1800));
+  },
+
+  clearCast() {
+    (this.castTimers || []).forEach((timer) => clearTimeout(timer));
+    this.castTimers = [];
+    this.pendingCast = null;
+  },
+
+  handleSkipCast() {
+    if (this.pendingCast) this.finishCast(this.pendingCast);
+  },
+
+  finishCast(pending) {
+    if (!pending || this.pendingCast !== pending) return;
+    const { result, guideLabel } = pending;
+    this.clearCast();
+    const historyEntry = createHistoryEntry("yao", {
+      badge: `${result.changedHexagram.title} · ${result.decision.label}`,
+      question: result.question,
+      questionGuideLabel: guideLabel,
+      result,
+      reviewStatus: "pending",
+      subtitle: `${guideLabel ? `${guideLabel} · ` : ""}${result.calendar.monthPillar}月 ${result.calendar.dayPillar}日 · ${result.relationProfile.shiLabel}世 ${result.relationProfile.yingLabel}应`,
+      summary: result.yongShenProfile.verdictBody,
+      timingPreview: buildTimingPreview(result.timingProfile),
+      title: `${result.topic.label} · ${result.originalHexagram.title}`,
+      topicLabel: result.topic.label,
+    });
+
+    let recordSaved = true;
+    try {
+      addHistory(historyEntry);
+      requestHistorySync({ reason: "yao-created" });
+    } catch (error) {
+      recordSaved = false;
+      wx.showToast({ title: "本机保存失败，请先保存海报", icon: "none" });
+    }
+
+    this.setData({
+      activeRecordId: recordSaved ? historyEntry.id : "",
+      recordSaved,
+      castingText: "先看一句结果。要不要展开详细盘，等你自己决定。",
+      drawButtonText: "再问一件事",
+      isCasting: false,
+      castProgress: 6,
+      castingRows: result.castLines.slice().reverse().map((line) => ({ ...line, revealed: true })),
+      questionInput: result.question,
+      result,
+      hexagramKnowledge: getHexagramKnowledge(result.originalHexagram.id),
+      showHexagramKnowledge: false,
+    });
+    wx.pageScrollTo({ scrollTop: 0, duration: 200 });
+  },
+
+  handleKnowledgeToggle() {
+    this.setData({ showHexagramKnowledge: !this.data.showHexagramKnowledge });
   },
 
   handleDetailToggle() {
@@ -482,17 +566,23 @@ Page({
       return;
     }
 
-    const updatedEntry = updateHistoryEntry(this.data.activeRecordId, {
-      reviewStatus: status,
-      reviewUpdatedAt: Date.now(),
-    });
+    let updatedEntry;
+    try {
+      updatedEntry = updateHistoryEntry(this.data.activeRecordId, {
+        reviewStatus: status,
+        reviewUpdatedAt: Date.now(),
+      });
+    } catch (error) {
+      wx.showToast({ title: "回访保存失败，请重试", icon: "none" });
+      return;
+    }
 
     if (!updatedEntry) {
       return;
     }
 
     this.setData({
-      ...buildReviewState(status),
+      ...buildReviewState(status, updatedEntry.reviewNote, updatedEntry.reviewUpdatedLabel),
     });
     requestHistorySync({
       reason: "yao-review-updated",
@@ -502,6 +592,37 @@ Page({
       title: `已标记为${updatedEntry.reviewLabel}`,
       icon: "none",
     });
+  },
+
+  handleEditReviewNote() {
+    const entry = getHistoryEntry(this.data.activeRecordId);
+    if (!entry) return;
+    this.setData({ editingReviewId: entry.id, reviewNoteDraft: entry.reviewNote });
+  },
+
+  handleReviewNoteInput(event) {
+    this.setData({ reviewNoteDraft: event.detail.value.slice(0, 200) });
+  },
+
+  handleCancelReviewNote() {
+    this.setData({ editingReviewId: "", reviewNoteDraft: "" });
+  },
+
+  handleSaveReviewNote() {
+    if (!this.data.editingReviewId) return;
+    try {
+      const entry = saveReviewNote(this.data.editingReviewId, this.data.reviewNoteDraft);
+      this.handleCancelReviewNote();
+      if (!entry) {
+        this.setData({ activeRecordId: "", recordSaved: false });
+        wx.showToast({ title: "记录已不在本机", icon: "none" });
+        return;
+      }
+      this.setData(buildReviewState(entry.reviewStatus, entry.reviewNote, entry.reviewUpdatedLabel));
+      wx.showToast({ title: "回访备注已保存", icon: "none" });
+    } catch (error) {
+      wx.showToast({ title: "备注保存失败，请重试", icon: "none" });
+    }
   },
 
   handlePosterOpen() {
@@ -643,12 +764,14 @@ Page({
           height: POSTER_HEIGHT,
           width: POSTER_WIDTH,
           success: ({ tempFilePath }) => {
+            if (this.data.result !== result) return;
             this.setData({
               isPosterGenerating: false,
               posterImage: tempFilePath,
             });
           },
           fail: () => {
+            if (this.data.result !== result) return;
             this.setData({
               isPosterGenerating: false,
             });
@@ -703,7 +826,13 @@ Page({
   },
 
   onUnload() {
-    clearTimeout(this.castTimer);
+    this.clearCast();
+  },
+
+  onHide() {
+    if (!this.data.isCasting) return;
+    this.clearCast();
+    this.setData({ isCasting: false, castingRows: [], castCoins: [], castProgress: 0, drawButtonText: "重新起卦", castingText: "起卦已取消，可以重新开始。" });
   },
 
   onShareAppMessage() {

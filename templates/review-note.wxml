@@ -1,0 +1,18 @@
+<view class="review-note-mask" wx:if="{{editingReviewId}}" bindtap="handleCancelReviewNote">
+  <view class="review-note-sheet" catchtap="noop">
+    <view class="section-title">回访备注</view>
+    <view class="subtle-note">记下后来实际发生的事，只保存在这条本机记录中。</view>
+    <textarea
+      class="review-note-input"
+      maxlength="200"
+      value="{{reviewNoteDraft}}"
+      placeholder="例如：周五收到回复，约好下周再沟通。"
+      bindinput="handleReviewNoteInput"
+    ></textarea>
+    <view class="review-note-counter">{{reviewNoteDraft.length}} / 200 · 留空保存可清除备注</view>
+    <view class="review-note-actions">
+      <button class="secondary-button" bindtap="handleCancelReviewNote">取消</button>
+      <button class="primary-button" bindtap="handleSaveReviewNote">保存备注</button>
+    </view>
+  </view>
+</view>

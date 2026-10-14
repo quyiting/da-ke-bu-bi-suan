@@ -2,6 +2,44 @@
   position: relative;
 }
 
+.profile-stats-toggle {
+  position: relative;
+  z-index: 1;
+  margin-top: 26rpx;
+}
+
+.profile-stats-toggle button {
+  width: 100%;
+}
+
+.capacity-summary {
+  margin-top: 18rpx;
+  font-size: 26rpx;
+  color: #6f5545;
+}
+
+.capacity-notice {
+  margin-top: 16rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 18rpx;
+  background: #f5ecdd;
+  color: #7c3e24;
+  font-size: 24rpx;
+  line-height: 1.7;
+}
+
+.history-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18rpx;
+}
+
+.history-delete-button {
+  margin: 0;
+  font-size: 24rpx;
+  color: #9d4d2d;
+}
+
 .profile-page::before,
 .profile-page::after {
   content: "";

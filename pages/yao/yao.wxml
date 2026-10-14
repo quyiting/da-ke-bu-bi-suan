@@ -5,7 +5,7 @@
     <view class="hero-copy">先看一句结果、一个建议和一个时间点。更细的盘，等你想看时再展开。</view>
   </view>
 
-  <view class="panel-card selector-card">
+  <view class="panel-card selector-card" wx:if="{{!isViewingRecord && !result}}">
     <view class="selector-stage">
       <view class="selector-head">
         <view class="selector-index">01</view>
@@ -64,6 +64,7 @@
         placeholder="例如：这次合作还值得继续推进吗？"
         value="{{questionInput}}"
         bindinput="handleQuestionInput"
+        disabled="{{isCasting}}"
       ></textarea>
 
       <view class="cast-panel">
@@ -71,11 +72,32 @@
           {{drawButtonText}}
         </button>
         <view class="subtle-note selector-tip">{{castingText}}</view>
+        <view class="casting-card" wx:if="{{isCasting}}" aria-role="status" aria-label="{{castingText}}">
+          <view class="casting-head">
+            <view class="section-mini">从初爻，慢慢成卦</view>
+            <view class="casting-count">{{castProgress}} / 6</view>
+          </view>
+          <view class="coin-row">
+            <view class="casting-wait" wx:if="{{!castProgress}}">三枚铜钱，正在落下…</view>
+            <view class="cast-coin {{item.value === 2 ? 'coin-front' : 'coin-back'}}" wx:for="{{castCoins}}" wx:key="id">{{item.label}}</view>
+          </view>
+          <view class="casting-stack">
+            <view class="casting-line-row" wx:for="{{castingRows}}" wx:key="position">
+              <view class="casting-position">{{item.positionLabel}}</view>
+              <view wx:if="{{item.revealed}}" class="hex-line-box {{item.isYang ? 'yang' : 'yin'}} {{item.isMoving ? 'moving' : ''}}"></view>
+              <view wx:else class="casting-placeholder"></view>
+              <view class="casting-type">{{item.revealed ? item.typeLabel + (item.isMoving ? ' · 动' : '') : '待投'}}</view>
+            </view>
+          </view>
+          <view class="subtle-note">正面记2，背面记3；6、9为动爻，由下向上记录。</view>
+          <button class="secondary-button skip-cast-button" bindtap="handleSkipCast">跳过动画，看结果</button>
+        </view>
       </view>
     </view>
   </view>
 
   <view class="fortune-card quick-result-card" wx:if="{{result}}">
+    <view class="subtle-note">{{recordSaved ? (isViewingRecord ? "正在回看当时保存的结果" : "完整卦盘已保存在本机记录") : "当前结果未保存在本机，可用海报留存"}}</view>
     <view class="quick-result-top">
       <view class="quick-result-copy">
         <view class="section-mini">先看结论</view>
@@ -86,8 +108,11 @@
     </view>
 
     <view class="result-question">{{result.question}}</view>
-    <view class="quick-voice">{{result.quickVoice}}</view>
-    <view class="result-copy">{{result.quickLead}}</view>
+    <view class="quick-insight-card">
+      <view class="section-mini">一句提醒</view>
+      <view class="quick-voice">{{result.quickVoice}}</view>
+      <view class="result-copy">{{result.quickLead}}</view>
+    </view>
 
     <view class="decision-row">
       <view class="tag" wx:for="{{result.quickTags}}" wx:key="*this">{{item}}</view>
@@ -110,6 +135,26 @@
       </button>
     </view>
     <view class="subtle-note detail-note">想继续看世应、用神、纳甲和动爻时，再展开下面这层就够了。</view>
+    <button class="secondary-button record-new-button" bindtap="handleNewQuestion">问另一件事</button>
+    <view class="subtle-note">内容仅供娱乐与自我探索参考。</view>
+  </view>
+
+  <view class="panel-card knowledge-card" wx:if="{{result && hexagramKnowledge}}">
+    <view class="knowledge-head">
+      <view>
+        <view class="section-mini">认识这卦</view>
+        <view class="knowledge-title">{{hexagramKnowledge.title}}</view>
+      </view>
+      <view class="knowledge-order">第 {{hexagramKnowledge.order}} 卦</view>
+    </view>
+    <button class="secondary-button knowledge-button" bindtap="handleKnowledgeToggle">{{showHexagramKnowledge ? '收起卦象小知识' : '读原文与白话提示'}}</button>
+    <view class="knowledge-body" wx:if="{{showHexagramKnowledge}}">
+      <view class="section-mini">《周易》卦辞原文</view>
+      <view class="knowledge-classic">{{hexagramKnowledge.guaCi}}</view>
+      <view class="section-mini knowledge-plain-label">白话提示</view>
+      <view class="result-copy">{{hexagramKnowledge.plainMeaning}}</view>
+      <view class="subtle-note">白话提示为本项目编写，供文化阅读与自我复盘参考。</view>
+    </view>
   </view>
 
   <block wx:if="{{result && showDetailedResult}}">
@@ -402,7 +447,7 @@
     </view>
   </block>
 
-  <view class="panel-card followup-card" wx:if="{{result}}">
+  <view class="panel-card followup-card" wx:if="{{result && recordSaved}}">
     <view class="section-title">结果回访</view>
     <view class="followup-head">
       <view class="tag review-tag {{activeReviewTone}}">{{activeReviewLabel}}</view>
@@ -419,31 +464,14 @@
         {{item.label}}
       </view>
     </view>
-  </view>
-
-  <view class="poster-mask" wx:if="{{posterVisible}}" bindtap="handlePosterClose">
-    <view class="poster-sheet" catchtap="noop">
-      <view class="section-title">分享海报</view>
-      <view class="subtle-note">适合保存到相册后转发，也可以长按图片直接保存。</view>
-
-      <image
-        wx:if="{{posterImage}}"
-        class="poster-image"
-        src="{{posterImage}}"
-        mode="widthFix"
-        show-menu-by-longpress="true"
-      ></image>
-
-      <view wx:else class="poster-loading">正在绘制卦单海报...</view>
-
-      <view class="poster-actions">
-        <button class="primary-button poster-action" bindtap="savePoster" disabled="{{!posterImage}}">
-          保存海报
-        </button>
-        <button class="secondary-button poster-action" bindtap="handlePosterClose">关闭</button>
-      </view>
+    <view class="review-note-display" wx:if="{{activeReviewNote}}">
+      <view class="section-mini">回访备注</view>
+      <view class="review-note-copy">{{activeReviewNote}}</view>
     </view>
+    <view class="subtle-note" wx:if="{{activeReviewUpdatedLabel}}">最近回访于 {{activeReviewUpdatedLabel}}</view>
+    <button class="secondary-button review-note-edit" bindtap="handleEditReviewNote">{{activeReviewNote ? "编辑回访备注" : "添加回访备注"}}</button>
   </view>
 
-  <canvas canvas-id="posterCanvas" class="poster-canvas"></canvas>
 </view>
+<include src="../../templates/poster.wxml" />
+<include src="../../templates/review-note.wxml" />

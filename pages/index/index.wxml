@@ -5,16 +5,33 @@
       <view class="brand-mark">算</view>
       <view class="brand-copy-wrap">
         <view class="brand-name">大可不必算</view>
-        <view class="brand-tagline">问一件当下的事，先听一句清楚的话。</view>
+      <view class="brand-tagline">抽一签，问一事，过几天再回来看看。</view>
       </view>
     </view>
     <view class="hero-title">今天最想问什么</view>
     <view class="hero-copy">{{topNotice}}</view>
 
     <view class="hero-promise-row">
-      <view class="hero-promise-chip">先给一句结果</view>
-      <view class="hero-promise-chip">需要时再看详细盘</view>
+      <view class="hero-promise-chip">免费体验</view>
+      <view class="hero-promise-chip">结果保存在本机</view>
     </view>
+
+    <view class="daily-card">
+      <view class="daily-card-head">
+        <view class="section-mini">今日一签</view>
+        <view class="daily-date">{{dailyCard.date}}</view>
+      </view>
+      <view class="daily-title">{{dailyCard.title}}</view>
+      <view class="daily-copy">{{dailyCard.copy}}</view>
+      <button class="primary-button daily-action" bindtap="handleOpenDaily">{{dailyCard.action}}</button>
+    </view>
+
+    <view class="home-entry-actions">
+      <button class="secondary-button" bindtap="handleOpenDraw">主题抽签</button>
+      <button class="secondary-button" bindtap="handleStartYao">六爻问事</button>
+    </view>
+
+    <view class="section-mini shortcut-heading">也可以从一个具体问题开始</view>
 
     <view class="shortcut-grid home-shortcuts">
       <view
@@ -38,7 +55,7 @@
       <view class="starter-quote">“{{activeShortcut.questionTemplate}}”</view>
     </view>
 
-    <button class="primary-button start-button" bindtap="handleStartYao">立即起卦</button>
+    <button class="primary-button start-button" bindtap="handleStartYao">用这个问题起卦</button>
 
     <view class="utility-grid mini-link-grid">
       <view

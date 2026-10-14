@@ -1,4 +1,5 @@
 const STORAGE_KEY = "fortune-history";
+const HISTORY_LIMIT = 20;
 
 const TYPE_LABELS = {
   chart: "星盘",
@@ -78,6 +79,7 @@ function decorateEntry(entry) {
     question: safeEntry.question || "",
     questionGuideLabel: safeEntry.questionGuideLabel || "",
     reviewLabel: reviewMeta ? reviewMeta.label : "",
+    reviewNote: safeEntry.reviewNote || "",
     reviewStatus,
     reviewTone: reviewMeta ? reviewMeta.tone : "",
     reviewUpdatedLabel: safeEntry.reviewUpdatedAt ? formatRecordTime(safeEntry.reviewUpdatedAt) : "",
@@ -99,6 +101,26 @@ function getHistory() {
   return Array.isArray(history) ? history.map((item) => decorateEntry(item)) : [];
 }
 
+function getHistoryEntry(entryId) {
+  return getHistory().find((entry) => entry.id === entryId) || null;
+}
+
+function getHistoryCapacity(history = getHistory()) {
+  const total = history.length;
+  const remaining = Math.max(0, HISTORY_LIMIT - total);
+  const oldestEntry = history.reduce((oldest, entry) =>
+    !oldest || entry.updatedAt <= oldest.updatedAt ? entry : oldest, null);
+
+  return {
+    total,
+    limit: HISTORY_LIMIT,
+    remaining,
+    isNearLimit: total > 0 && remaining <= 2,
+    isFull: total >= HISTORY_LIMIT,
+    oldestEntry: oldestEntry ? { id: oldestEntry.id, title: oldestEntry.title } : null,
+  };
+}
+
 function createHistoryEntry(type, payload) {
   const now = Date.now();
 
@@ -113,6 +135,8 @@ function createHistoryEntry(type, payload) {
     createdAt: now,
     question: payload.question || "",
     questionGuideLabel: payload.questionGuideLabel || "",
+    result: payload.result || null,
+    reviewNote: payload.reviewNote || "",
     reviewStatus: type === "yao" ? payload.reviewStatus || "pending" : payload.reviewStatus || "",
     reviewUpdatedAt: payload.reviewUpdatedAt || 0,
     syncedAt: payload.syncedAt || 0,
@@ -132,7 +156,7 @@ function replaceHistory(history) {
 
       return rightTime - leftTime;
     })
-    .slice(0, 20);
+    .slice(0, HISTORY_LIMIT);
 
   wx.setStorageSync(STORAGE_KEY, nextHistory);
 
@@ -184,6 +208,20 @@ function updateHistoryEntry(entryId, updates) {
 
 function clearHistory() {
   wx.setStorageSync(STORAGE_KEY, []);
+}
+
+function saveReviewNote(entryId, note) {
+  return updateHistoryEntry(entryId, {
+    reviewNote: `${note || ""}`.trim().slice(0, 200),
+    reviewUpdatedAt: Date.now(),
+  });
+}
+
+function deleteHistoryEntry(entryId) {
+  const history = getHistory();
+  if (!history.some((entry) => entry.id === entryId)) return false;
+  replaceHistory(history.filter((entry) => entry.id !== entryId));
+  return true;
 }
 
 function pickNewerEntry(currentEntry, candidateEntry) {
@@ -376,7 +414,7 @@ function summarizeHistory(history = getHistory()) {
     exploreDays,
     favoriteType,
     favoriteTypeLabel,
-    lastUpdated: safeHistory[0] ? safeHistory[0].dateLabel : "暂无记录",
+    lastUpdated: safeHistory[0] ? formatRecordTime(safeHistory[0].updatedAt || safeHistory[0].createdAt) : "暂无记录",
     lastSyncedAt,
     lastSyncedLabel: lastSyncedAt ? formatRecordTime(lastSyncedAt) : "仅本地存储",
     matchedReviewCount,
@@ -398,9 +436,12 @@ module.exports = {
   clearHistory,
   combineHistory,
   createHistoryEntry,
+  deleteHistoryEntry,
   getReviewMeta,
   getSyncMeta,
   getHistory,
+  getHistoryEntry,
+  getHistoryCapacity,
   markHistoryEntriesFailed,
   markHistoryEntriesSynced,
   markHistoryLocalOnly,
@@ -408,6 +449,7 @@ module.exports = {
   markHistorySynced,
   mergeHistory,
   replaceHistory,
+  saveReviewNote,
   summarizeHistory,
   updateHistoryEntry,
 };

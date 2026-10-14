@@ -1,6 +1,7 @@
-const { getHistory, summarizeHistory, updateHistoryEntry } = require("../../utils/history");
+const { getHistory, getHistoryEntry, getHistoryCapacity, deleteHistoryEntry, saveReviewNote, summarizeHistory, updateHistoryEntry } = require("../../utils/history");
 const { clearLocalHistoryOnly } = require("../../utils/history-sync");
 const { buildLocalAccountState } = require("../../utils/cloud");
+const { openRecord } = require("../../utils/record-navigation");
 
 const filterOptions = [
   { id: "all", label: "全部" },
@@ -20,7 +21,7 @@ function enhanceAccountState(accountState = {}, history = []) {
   let guideTitle = total ? "记录只留在这台设备" : "第一条记录会直接保存在本机";
   let guideCopy = total
     ? "当前版本只使用微信小程序本地存储。换设备、清理小程序数据或卸载后，这些记录都不会自动迁移回来。"
-    : "抽签、问事和星盘结果都会直接写入当前设备本地存储，不会上传到云端。";
+    : "抽签和问事结果会直接写入当前设备本地存储。";
 
   if (total >= 10) {
     guideTitle = "这台设备已经存下不少记录";
@@ -38,12 +39,18 @@ function enhanceAccountState(accountState = {}, history = []) {
 }
 
 function getVisibleHistory(history = getHistory()) {
-  return (Array.isArray(history) ? history : []).filter((item) => item.type !== "chart");
+  return (Array.isArray(history) ? history : [])
+    .filter((item) => item.type !== "chart")
+    .map(({ result, ...entry }) => ({ ...entry, hasResult: Boolean(result) }));
 }
 
 Page({
   data: {
     activeFilter: "all",
+    showStats: false,
+    capacity: { total: 0, limit: 20, remaining: 20, isNearLimit: false, isFull: false },
+    editingReviewId: "",
+    reviewNoteDraft: "",
     accountState: enhanceAccountState(buildLocalAccountState("记录只保存在当前设备。")),
     filterOptions,
     filteredHistory: [],
@@ -71,13 +78,15 @@ Page({
   },
 
   loadHistory() {
-    const history = getVisibleHistory();
+    const allHistory = getHistory();
+    const history = getVisibleHistory(allHistory);
     const summary = summarizeHistory(history);
     const statusCopy = history.length
       ? "记录已保存在当前设备本地。"
       : "当前还没有本地记录，新内容会直接保存在这台设备。";
 
     this.setData({
+      capacity: getHistoryCapacity(allHistory),
       accountState: enhanceAccountState(buildLocalAccountState(statusCopy), history),
       history,
       summary,
@@ -89,6 +98,10 @@ Page({
   setFilter(event) {
     const { filter } = event.currentTarget.dataset;
     this.applyFilter(filter);
+  },
+
+  handleStatsToggle() {
+    this.setData({ showStats: !this.data.showStats });
   },
 
   applyFilter(filter, sourceHistory) {
@@ -111,14 +124,74 @@ Page({
       return;
     }
 
-    updateHistoryEntry(id, {
-      reviewStatus: status,
-      reviewUpdatedAt: Date.now(),
-    });
+    try {
+      updateHistoryEntry(id, {
+        reviewStatus: status,
+        reviewUpdatedAt: Date.now(),
+      });
+    } catch (error) {
+      wx.showToast({ title: "回访保存失败，请重试", icon: "none" });
+      return;
+    }
     this.loadHistory();
     wx.showToast({
       title: "回访已更新",
       icon: "none",
+    });
+  },
+
+  handleOpenRecord(event) {
+    openRecord(event.currentTarget.dataset.id);
+  },
+
+  handleEditReviewNote(event) {
+    const entry = getHistoryEntry(event.currentTarget.dataset.id);
+    if (!entry || entry.type !== "yao") return;
+    this.setData({ editingReviewId: entry.id, reviewNoteDraft: entry.reviewNote });
+  },
+
+  handleReviewNoteInput(event) {
+    this.setData({ reviewNoteDraft: event.detail.value.slice(0, 200) });
+  },
+
+  handleCancelReviewNote() {
+    this.setData({ editingReviewId: "", reviewNoteDraft: "" });
+  },
+
+  handleSaveReviewNote() {
+    if (!this.data.editingReviewId) return;
+    try {
+      const entry = saveReviewNote(this.data.editingReviewId, this.data.reviewNoteDraft);
+      this.handleCancelReviewNote();
+      this.loadHistory();
+      wx.showToast({ title: entry ? "回访备注已保存" : "记录已不在本机", icon: "none" });
+    } catch (error) {
+      wx.showToast({ title: "备注保存失败，请重试", icon: "none" });
+    }
+  },
+
+  noop() {},
+
+  handleDeleteRecord(event) {
+    const { id } = event.currentTarget.dataset;
+    const entry = getHistoryEntry(id);
+    if (!entry) return;
+
+    wx.showModal({
+      title: "删除这条记录？",
+      content: `“${entry.title}”的完整结果和回访信息都会从本机删除，删除后无法恢复。`,
+      confirmText: "删除",
+      confirmColor: "#a84f2c",
+      success: ({ confirm }) => {
+        if (!confirm) return;
+        try {
+          const deleted = deleteHistoryEntry(id);
+          this.loadHistory();
+          wx.showToast({ title: deleted ? "记录已删除" : "记录已不在本机", icon: "none" });
+        } catch (error) {
+          wx.showToast({ title: "删除失败，请重试", icon: "none" });
+        }
+      },
     });
   },
 
@@ -144,6 +217,7 @@ Page({
         const visibleSummary = summarizeHistory(visibleHistory);
 
         this.setData({
+          capacity: getHistoryCapacity(result.history),
           accountState: enhanceAccountState(result.accountState, visibleHistory),
           history: visibleHistory,
           summary: visibleSummary,
