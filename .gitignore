@@ -3,3 +3,6 @@ node_modules/
 miniprogram_npm/
 dist/
 project.private.config.json
+.env
+.env.*
+!.env.example
