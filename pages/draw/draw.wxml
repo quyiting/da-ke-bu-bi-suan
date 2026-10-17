@@ -1,50 +1,48 @@
 <view class="page-shell draw-page">
-  <view class="hero-card draw-hero">
-    <view class="hero-badge">大可不必算 · {{isDaily ? '今日一签' : '抽签'}}</view>
-    <view class="hero-title">{{isDaily ? '今天，慢慢来' : '先抽一签'}}</view>
-    <view class="hero-copy">{{isDaily ? '一天一签，给今天留一句提醒。同一天回来，还是同一支签。' : '不想一上来就看完整排盘时，先来这里听一句提醒。'}}</view>
+  <view class="draw-hero" wx:if="{{!currentLot}}">
+    <view class="hero-title">{{isDaily ? '今日一签' : '抽一支主题签'}}</view>
+    <view class="hero-copy">{{isDaily ? '每天一句提醒，今天慢慢来。' : '选一个主题，听一句提醒。'}}</view>
     <view class="daily-date" wx:if="{{isDaily}}">{{dailyDate}}</view>
   </view>
 
   <view class="panel-card ritual-panel" wx:if="{{!isViewingRecord && !isDaily && !currentLot}}">
-    <view class="section-mini">先看你在问什么</view>
+    <view class="section-mini">想问哪方面？</view>
     <view class="topic-grid">
-      <view
+      <button
         wx:for="{{drawTopics}}"
         wx:key="id"
         class="chip-button topic-chip {{selectedTopicId === item.id ? 'active' : ''}}"
         data-topic-id="{{item.id}}"
         bindtap="selectTopic"
+          disabled="{{isDrawing}}"
+          aria-pressed="{{selectedTopicId === item.id}}"
       >
         <view class="chip-title">{{item.label}}</view>
-        <view class="chip-copy">{{item.cue}}</view>
-      </view>
+      </button>
     </view>
 
-    <view class="section-mini selector-mini">再看你想怎么面对</view>
+    <view class="section-mini selector-mini">现在的心情</view>
     <view class="mode-grid">
-      <view
+      <button
         wx:for="{{drawModes}}"
         wx:key="id"
         class="chip-button mode-chip {{selectedModeId === item.id ? 'active' : ''}}"
         data-mode-id="{{item.id}}"
         bindtap="selectMode"
+          disabled="{{isDrawing}}"
+          aria-pressed="{{selectedModeId === item.id}}"
       >
         <view class="chip-title">{{item.label}}</view>
-        <view class="chip-copy">{{item.desc}}</view>
-      </view>
+      </button>
     </view>
 
-    <view class="prompt-chip">{{currentPrompt}}</view>
-    <view class="subtle-note">{{supportivePrompt}}</view>
   </view>
 
   <view class="lot-stage" wx:if="{{!isViewingRecord && !currentLot}}">
     <view class="lot-vessel {{isDrawing ? 'is-drawing' : ''}}">
-      <view class="lot-ring"></view>
-      <view class="lot-title">{{isDaily ? '今日一签' : '玄趣签筒'}}</view>
-      <view class="lot-caption">{{motionText}}</view>
+      <view class="lot-title">签</view>
     </view>
+    <view class="lot-caption">{{motionText}}</view>
 
     <button
       class="primary-button draw-button"
@@ -92,7 +90,7 @@
       </view>
     </view>
 
-    <button class="secondary-button draw-button" bindtap="handleDetailToggle">{{showDetailedResult ? "收起更多解读" : "展开更多解读"}}</button>
+    <button class="secondary-button draw-button" bindtap="handleDetailToggle" aria-expanded="{{showDetailedResult}}">{{showDetailedResult ? "收起更多解读" : "展开更多解读"}}</button>
 
     <block wx:if="{{showDetailedResult}}">
 

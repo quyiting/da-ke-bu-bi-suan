@@ -1,95 +1,41 @@
 <view class="page-shell index-page">
-  <view class="hero-card ask-hero">
-    <view class="hero-badge">今日入口</view>
-    <view class="brand-cover">
-      <view class="brand-mark">算</view>
-      <view class="brand-copy-wrap">
-        <view class="brand-name">大可不必算</view>
-      <view class="brand-tagline">抽一签，问一事，过几天再回来看看。</view>
-      </view>
-    </view>
-    <view class="hero-title">今天最想问什么</view>
-    <view class="hero-copy">{{topNotice}}</view>
-
-    <view class="hero-promise-row">
-      <view class="hero-promise-chip">免费体验</view>
-      <view class="hero-promise-chip">结果保存在本机</view>
-    </view>
-
-    <view class="daily-card">
-      <view class="daily-card-head">
-        <view class="section-mini">今日一签</view>
-        <view class="daily-date">{{dailyCard.date}}</view>
-      </view>
-      <view class="daily-title">{{dailyCard.title}}</view>
-      <view class="daily-copy">{{dailyCard.copy}}</view>
-      <button class="primary-button daily-action" bindtap="handleOpenDaily">{{dailyCard.action}}</button>
-    </view>
-
-    <view class="home-entry-actions">
-      <button class="secondary-button" bindtap="handleOpenDraw">主题抽签</button>
-      <button class="secondary-button" bindtap="handleStartYao">六爻问事</button>
-    </view>
-
-    <view class="section-mini shortcut-heading">也可以从一个具体问题开始</view>
-
-    <view class="shortcut-grid home-shortcuts">
-      <view
-        wx:for="{{shortcutPresets}}"
-        wx:key="id"
-        class="shortcut-item {{selectedShortcutId === item.id ? 'active' : ''}}"
-        data-shortcut-id="{{item.id}}"
-        bindtap="handleSelectShortcut"
-      >
-        <view class="shortcut-title">{{item.title}}</view>
-        <view class="shortcut-copy">{{item.copy}}</view>
-      </view>
-    </view>
-
-    <view class="starter-panel">
-      <view class="starter-head">
-        <view class="section-mini">当前准备问</view>
-        <view class="starter-kicker">{{activeShortcut.topicLabel}} · {{activeShortcut.guideLabel}}</view>
-      </view>
-      <view class="starter-title">{{activeShortcut.title}}</view>
-      <view class="starter-quote">“{{activeShortcut.questionTemplate}}”</view>
-    </view>
-
-    <button class="primary-button start-button" bindtap="handleStartYao">用这个问题起卦</button>
-
-    <view class="utility-grid mini-link-grid">
-      <view
-        wx:for="{{utilityCards}}"
-        wx:key="title"
-        class="utility-item mini-link-card"
-        data-mode="{{item.mode}}"
-        data-url="{{item.url}}"
-        bindtap="handleOpenUtility"
-      >
-        <view class="feature-tag">{{item.tag}}</view>
-        <view class="utility-title">{{item.title}}</view>
-        <view class="utility-action">{{item.action}}</view>
-      </view>
-    </view>
-
-    <view class="metric-strip summary-strip hero-metrics">
-      <view class="metric-box" wx:for="{{summaryCards}}" wx:key="label">
-        <view class="metric-value">{{item.value}}</view>
-        <view class="metric-label">{{item.label}}</view>
-      </view>
-    </view>
+  <view class="page-heading">
+    <view class="hero-title">给自己一点时间</view>
+    <view class="hero-copy">抽一签，问一事，记下此刻。</view>
   </view>
 
-  <view class="fortune-card recent-card">
-    <view class="recent-topline">
-      <view class="section-mini">{{recentCard.eyebrow}}</view>
-      <view class="recent-badge">继续这里</view>
+  <view class="daily-card">
+    <view class="daily-card-head">
+      <view class="section-mini">今日一签</view>
+      <view class="daily-date">{{dailyCard.date}}</view>
     </view>
-    <view class="recent-title">{{recentCard.title}}</view>
-    <view class="recent-copy">{{recentCard.body}}</view>
-    <view class="keyword-row">
-      <view class="tag" wx:for="{{recentCard.tags}}" wx:key="*this">{{item}}</view>
-    </view>
-    <button class="secondary-button recent-action" bindtap="handleOpenRecent">{{recentCard.actionLabel}}</button>
+    <view class="daily-symbol" aria-hidden="true">签</view>
+    <view class="daily-title">{{dailyCard.title}}</view>
+    <view class="daily-copy">{{dailyCard.copy}}</view>
+    <button class="primary-button daily-action" bindtap="handleOpenDaily">{{dailyCard.action}}</button>
   </view>
+
+  <view class="home-entry-grid">
+    <button class="entry-button" bindtap="handleOpenDraw">
+      <view class="entry-title">主题抽签 <text class="entry-arrow">›</text></view>
+      <view class="entry-copy">为在意的事找一句提醒</view>
+    </button>
+    <button class="entry-button" bindtap="handleOpenYao">
+      <view class="entry-title">六爻问事 <text class="entry-arrow">›</text></view>
+      <view class="entry-copy">带着一个具体问题来</view>
+    </button>
+  </view>
+
+  <view class="recent-section" wx:if="{{hasHistory}}">
+    <view class="recent-heading">
+      <view class="section-title">最近记录</view>
+      <navigator class="text-link" url="/pages/profile/profile" open-type="switchTab">查看全部 ›</navigator>
+    </view>
+    <button class="recent-card" bindtap="handleOpenRecent">
+      <view class="recent-title">{{recentCard.title}}</view>
+      <view class="recent-copy">{{recentCard.body}}</view>
+      <view class="recent-action">{{recentCard.actionLabel}} ›</view>
+    </button>
+  </view>
+  <view class="home-note">免费体验 · 记录仅保存在本机</view>
 </view>

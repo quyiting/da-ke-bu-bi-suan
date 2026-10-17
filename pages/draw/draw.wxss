@@ -1,13 +1,12 @@
-.draw-hero,
 .ritual-panel,
 .result-card {
-  padding: 36rpx 30rpx;
+  padding: 28rpx;
 }
 
 .ritual-panel,
 .lot-stage,
 .result-card {
-  margin-top: 28rpx;
+  margin-top: 24rpx;
 }
 
 .topic-grid,
@@ -28,15 +27,15 @@
 
 .mode-chip {
   width: 31.8%;
-  min-height: 136rpx;
+  min-height: 44px;
 }
 
 .prompt-chip {
   margin-top: 22rpx;
   padding: 22rpx 24rpx;
-  border-radius: 24rpx;
-  background: rgba(255, 246, 232, 0.92);
-  color: #7b573f;
+  border-radius: 16rpx;
+  background: var(--soft);
+  color: var(--muted);
   font-size: 26rpx;
   line-height: 1.8;
 }
@@ -48,32 +47,19 @@
 }
 
 .lot-vessel {
-  position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 480rpx;
-  height: 480rpx;
-  padding: 40rpx;
-  box-sizing: border-box;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at top, rgba(255, 236, 204, 0.92) 0%, rgba(200, 136, 69, 0.98) 55%, rgba(125, 53, 24, 1) 100%);
-  box-shadow: 0 26rpx 46rpx rgba(89, 42, 18, 0.2);
-  color: #fff8f1;
-  text-align: center;
+  width: 104rpx;
+  height: 148rpx;
+  border: 1rpx solid #ceb5a0;
+  border-radius: 52rpx 52rpx 12rpx 12rpx;
+  background: #f8f0e7;
+  color: var(--accent);
 }
 
 .lot-vessel.is-drawing {
   animation: sway 920ms ease-in-out infinite;
-}
-
-.lot-ring {
-  position: absolute;
-  inset: 26rpx;
-  border-radius: 50%;
-  border: 2rpx solid rgba(255, 244, 227, 0.18);
 }
 
 .lot-title {
@@ -85,11 +71,12 @@
 
 .lot-caption {
   position: relative;
-  width: 72%;
+  max-width: 560rpx;
   margin-top: 18rpx;
   font-size: 26rpx;
   line-height: 1.7;
-  opacity: 0.95;
+  text-align: center;
+  color: var(--muted);
 }
 
 .draw-button {
@@ -108,20 +95,20 @@
 .daily-date,
 .daily-result-date {
   margin-top: 16rpx;
-  color: #7b573f;
+  color: var(--muted);
   font-size: 24rpx;
 }
 
 .insight-card {
   padding: 24rpx;
-  border-left: 6rpx solid #a84f2c;
+  border-left: 4rpx solid var(--accent);
   border-radius: 0 20rpx 20rpx 0;
-  background: #f5ecdd;
+  background: var(--soft);
 }
 
 .insight-text {
   margin-top: 14rpx;
-  color: #4a3123;
+  color: var(--muted);
   font-size: 28rpx;
   line-height: 1.8;
 }
@@ -143,8 +130,8 @@
   width: 40rpx;
   height: 40rpx;
   border-radius: 50%;
-  background: #f5ecdd;
-  color: #a84f2c;
+  background: var(--soft);
+  color: var(--muted);
   text-align: center;
   font-size: 24rpx;
   line-height: 40rpx;
@@ -153,7 +140,7 @@
 .action-copy {
   flex: 1;
   min-width: 0;
-  color: #654a38;
+  color: var(--muted);
   font-size: 26rpx;
   line-height: 1.7;
 }
@@ -161,20 +148,20 @@
 .lot-level {
   font-size: 24rpx;
   letter-spacing: 2rpx;
-  color: #9b5e2d;
+  color: var(--muted);
 }
 
 .lot-name {
   margin-top: 10rpx;
   font-size: 42rpx;
   font-weight: 700;
-  color: #312116;
+  color: var(--muted);
 }
 
 .lot-context {
   margin-top: 10rpx;
   font-size: 24rpx;
-  color: #966033;
+  color: var(--muted);
 }
 
 .result-badge {
@@ -182,15 +169,15 @@
   padding: 12rpx 18rpx;
   border-radius: 999rpx;
   background: rgba(163, 99, 47, 0.12);
-  color: #a06130;
+  color: var(--muted);
   font-size: 22rpx;
 }
 
 .poem-card {
   margin-top: 22rpx;
   padding: 26rpx 24rpx;
-  border-radius: 24rpx;
-  background: rgba(255, 246, 232, 0.92);
+  border-radius: 16rpx;
+  background: var(--soft);
 }
 
 .poem-text {
@@ -198,7 +185,7 @@
   font-size: 34rpx;
   font-weight: 600;
   line-height: 1.8;
-  color: #4a3123;
+  color: var(--muted);
 }
 
 .result-section {
@@ -222,12 +209,12 @@
 .meter-label {
   font-size: 26rpx;
   font-weight: 600;
-  color: #3b271a;
+  color: var(--muted);
 }
 
 .meter-score {
   font-size: 22rpx;
-  color: #a06130;
+  color: var(--muted);
 }
 
 .score-bar {
@@ -241,7 +228,7 @@
 .score-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #e4bf8d 0%, #bf7740 100%);
+  background: var(--accent);
 }
 
 .result-meta {
@@ -255,7 +242,7 @@
   margin-top: 22rpx;
   font-size: 24rpx;
   line-height: 1.8;
-  color: #7b5f4b;
+  color: var(--muted);
 }
 
 @keyframes sway {
@@ -275,3 +262,36 @@
     transform: rotate(0deg) scale(1);
   }
 }
+
+.draw-hero {
+  padding: 16rpx 4rpx 8rpx;
+}
+.topic-grid, .mode-grid {
+  margin-top: 16rpx;
+}
+.topic-chip, .mode-chip {
+  margin: 0;
+  line-height: 1.5;
+}
+.chip-title {
+  font-size: 28rpx;
+  font-weight: 400;
+}
+.lot-stage {
+  padding-top: 24rpx;
+}
+.result-card {
+  margin-top: 0;
+}
+.lot-name, .poem-text, .insight-text {
+  color: var(--text);
+}
+.lot-name {
+  font-size: 40rpx;
+}
+.poem-card {
+  background: var(--accent-soft);
+}
+@media (prefers-reduced-motion: reduce) { .lot-vessel.is-drawing {
+  animation: none;
+} }

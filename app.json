@@ -7,15 +7,15 @@
   ],
   "window": {
     "navigationBarTitleText": "大可不必算",
-    "navigationBarBackgroundColor": "#f5efe4",
+    "navigationBarBackgroundColor": "#f7f7f4",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#efe5d6",
+    "backgroundColor": "#f7f7f4",
     "backgroundTextStyle": "light"
   },
   "tabBar": {
-    "color": "#8b6a52",
-    "selectedColor": "#a84f2c",
-    "backgroundColor": "#fffaf3",
+    "color": "#6e6a63",
+    "selectedColor": "#995239",
+    "backgroundColor": "#ffffff",
     "borderStyle": "black",
     "list": [
       {

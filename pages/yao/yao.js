@@ -297,7 +297,7 @@ function consumePendingIntent(page) {
     posterImage: "",
     posterVisible: false,
     questionGuides: guides,
-    questionInput: pendingIntent.questionInput || (guide ? guide.template : topic.prompt),
+    questionInput: typeof pendingIntent.questionInput === "string" ? pendingIntent.questionInput : (guide ? guide.template : topic.prompt),
     result: null,
     hexagramKnowledge: null,
     showHexagramKnowledge: false,

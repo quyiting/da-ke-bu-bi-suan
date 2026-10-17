@@ -1,63 +1,46 @@
 <view class="page-shell yao-page">
-  <view class="hero-card yao-hero">
-    <view class="hero-badge">大可不必算 · 问事</view>
-    <view class="hero-title">先问一句</view>
-    <view class="hero-copy">先看一句结果、一个建议和一个时间点。更细的盘，等你想看时再展开。</view>
+  <view class="yao-hero" wx:if="{{!result}}">
+    <view class="hero-title">问一件在意的事</view>
+    <view class="hero-copy">选个方向，把问题写下来。</view>
   </view>
 
   <view class="panel-card selector-card" wx:if="{{!isViewingRecord && !result}}">
     <view class="selector-stage">
-      <view class="selector-head">
-        <view class="selector-index">01</view>
-        <view class="selector-copy">
-          <view class="section-mini">先选方向</view>
-          <view class="selector-desc">先决定你现在更像在问关系、工作、选择，还是时机。</view>
-        </view>
-      </view>
+      <view class="form-label">想问哪方面？</view>
       <view class="topic-grid">
-        <view
+        <button
           wx:for="{{yaoTopics}}"
           wx:key="id"
           class="chip-button topic-chip {{selectedTopicId === item.id ? 'active' : ''}}"
           data-topic-id="{{item.id}}"
           bindtap="selectTopic"
+          disabled="{{isCasting}}"
+          aria-pressed="{{selectedTopicId === item.id}}"
         >
           <view class="chip-title">{{item.label}}</view>
-          <view class="chip-copy">{{item.cue}}</view>
-        </view>
+        </button>
       </view>
     </view>
 
     <view class="selector-stage">
-      <view class="selector-head">
-        <view class="selector-index">02</view>
-        <view class="selector-copy">
-          <view class="section-mini">再选问法</view>
-          <view class="selector-desc">把问题收到一个角度，结果会比泛泛地问更清楚。</view>
-        </view>
-      </view>
+      <view class="form-label">试试这样问 <text class="optional-label">可选</text></view>
       <view class="guide-row compact-guide-row">
-        <view
+        <button
           wx:for="{{questionGuides}}"
           wx:key="id"
           class="guide-chip {{selectedGuideId === item.id ? 'active' : ''}}"
           data-guide-id="{{item.id}}"
           bindtap="applyQuestionGuide"
+          disabled="{{isCasting}}"
+          aria-pressed="{{selectedGuideId === item.id}}"
         >
           <view class="guide-chip-title">{{item.label}}</view>
-          <view class="guide-chip-copy">{{item.cue}}</view>
-        </view>
+        </button>
       </view>
     </view>
 
     <view class="selector-stage">
-      <view class="selector-head">
-        <view class="selector-index">03</view>
-        <view class="selector-copy">
-          <view class="section-mini">把问题补成一句话</view>
-          <view class="selector-desc">别问太大，只问你眼前最在意的这一件事。</view>
-        </view>
-      </view>
+      <view class="form-label">你的问题</view>
       <textarea
         class="question-box"
         maxlength="60"
@@ -65,7 +48,10 @@
         value="{{questionInput}}"
         bindinput="handleQuestionInput"
         disabled="{{isCasting}}"
+        aria-label="你的问题，最多60字"
+        placeholder-class="question-placeholder"
       ></textarea>
+      <view class="question-counter">{{questionInput.length}} / 60</view>
 
       <view class="cast-panel">
         <button class="primary-button cast-button" bindtap="handleCast" disabled="{{isCasting}}" loading="{{isCasting}}">
@@ -104,7 +90,7 @@
         <view class="result-title">{{result.decision.label}}</view>
         <view class="result-meta-top">{{result.topic.label}} · {{result.originalHexagram.title}}之{{result.changedHexagram.title}}</view>
       </view>
-      <view class="oracle-seal">断</view>
+
     </view>
 
     <view class="result-question">{{result.question}}</view>
@@ -127,14 +113,13 @@
     </view>
 
     <view class="share-actions">
-      <button class="primary-button share-button" bindtap="handleDetailToggle">
+      <button class="secondary-button share-button" bindtap="handleDetailToggle" aria-expanded="{{showDetailedResult}}">
         {{showDetailedResult ? "收起详细排盘" : "展开详细排盘"}}
       </button>
-      <button class="secondary-button share-button" bindtap="handlePosterOpen" loading="{{isPosterGenerating}}">
+      <button class="primary-button share-button" bindtap="handlePosterOpen" loading="{{isPosterGenerating}}">
         生成海报
       </button>
     </view>
-    <view class="subtle-note detail-note">想继续看世应、用神、纳甲和动爻时，再展开下面这层就够了。</view>
     <button class="secondary-button record-new-button" bindtap="handleNewQuestion">问另一件事</button>
     <view class="subtle-note">内容仅供娱乐与自我探索参考。</view>
   </view>
@@ -147,7 +132,7 @@
       </view>
       <view class="knowledge-order">第 {{hexagramKnowledge.order}} 卦</view>
     </view>
-    <button class="secondary-button knowledge-button" bindtap="handleKnowledgeToggle">{{showHexagramKnowledge ? '收起卦象小知识' : '读原文与白话提示'}}</button>
+    <button class="secondary-button knowledge-button" bindtap="handleKnowledgeToggle" aria-expanded="{{showHexagramKnowledge}}">{{showHexagramKnowledge ? '收起卦象小知识' : '读原文与白话提示'}}</button>
     <view class="knowledge-body" wx:if="{{showHexagramKnowledge}}">
       <view class="section-mini">《周易》卦辞原文</view>
       <view class="knowledge-classic">{{hexagramKnowledge.guaCi}}</view>
@@ -172,7 +157,7 @@
             {{result.generatedAtLabel}} · {{result.relationProfile.palaceLabel}} {{result.relationProfile.palaceStage}}
           </view>
         </view>
-        <view class="oracle-seal">卦</view>
+
       </view>
 
       <view class="result-question">{{result.question}}</view>
@@ -451,10 +436,10 @@
     <view class="section-title">结果回访</view>
     <view class="followup-head">
       <view class="tag review-tag {{activeReviewTone}}">{{activeReviewLabel}}</view>
-      <view class="subtle-note">这条卦已经保存到“我的记录”，后面可以回来改成已应、部分应或暂未应。</view>
+      <view class="subtle-note">记下这件事后来的进展。</view>
     </view>
     <view class="review-row">
-      <view
+      <button
         wx:for="{{reviewOptions}}"
         wx:key="id"
         class="review-chip {{activeReviewStatus === item.id ? 'active' : ''}}"
@@ -462,7 +447,7 @@
         bindtap="handleReviewStatus"
       >
         {{item.label}}
-      </view>
+      </button>
     </view>
     <view class="review-note-display" wx:if="{{activeReviewNote}}">
       <view class="section-mini">回访备注</view>

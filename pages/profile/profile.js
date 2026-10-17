@@ -48,6 +48,7 @@ Page({
   data: {
     activeFilter: "all",
     showStats: false,
+    expandedReviewId: "",
     capacity: { total: 0, limit: 20, remaining: 20, isNearLimit: false, isFull: false },
     editingReviewId: "",
     reviewNoteDraft: "",
@@ -98,6 +99,11 @@ Page({
   setFilter(event) {
     const { filter } = event.currentTarget.dataset;
     this.applyFilter(filter);
+  },
+
+  handleReviewToggle(event) {
+    const { id } = event.currentTarget.dataset;
+    this.setData({ expandedReviewId: this.data.expandedReviewId === id ? "" : id });
   },
 
   handleStatsToggle() {
